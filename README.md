@@ -1,13 +1,9 @@
-# Mobile-Robot-Simulator
+# Evolutionary-Robotics
+
+* Main task: "EA on benchmark functions"
 
 CODE DIVISION :
 
-* Main tasks
-– motion model (incl. 
-collision handling)
-– sensor model
-– visualization
-
-Elena Kane i6289291 - Motion Model and Visualisation</br>
-Nikolaos Ntantis i6273751 - Collision Detection and Handling</br>
-Ioannis Montesantos i6292068 - Sensor Model
+Elena Kane i6289291 - </br>
+Nikolaos Ntantis i6273751 - </br>
+Ioannis Montesantos i6292068 - 
