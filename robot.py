@@ -1,5 +1,4 @@
 import pygame
-from utils import blit_rotate_center
 import random
 import numpy as np
 import math
@@ -30,6 +29,16 @@ SENSORS_FONT = pygame.font.SysFont("comicsans", 12)
 # SENSORS - Divide circumference by number of sensors
 STEP_ANGLE = (math.pi*2) / 12
 # -------
+def blit_rotate_center(win, image, top_left, angle):
+    rotated_image = pygame.transform.rotozoom(image, angle,1)
+    new_rect = rotated_image.get_rect(
+        center=image.get_rect(topleft=top_left).center)
+    win.blit(rotated_image, new_rect.topleft)
+
+def blit_text_center(win, font, text):
+    render = font.render(text, 1, (200, 200, 200))
+    win.blit(render, (win.get_width()/2 - render.get_width() /
+                      2, win.get_height()/2 - render.get_height()/2))
 
 # Robot movement
 
