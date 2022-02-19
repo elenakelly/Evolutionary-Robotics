@@ -11,6 +11,6 @@ Nikolaos Ntantis i6273751 - </br>
 Ioannis Montesantos i6292068 - </br>
 
 To do:</br>
-*fix collision </br>
-*create the EA</br>
-*run experiments</br>
+* fix collision </br>
+* create the EA</br>
+* run experiments</br>
