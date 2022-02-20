@@ -28,7 +28,7 @@ def plotGraphs(swarm, function, iteration, plot_range):
     fig, ax = plt.subplots(1, 1)
     cp = ax.contour(X, Y, Z, 100)
     fig.colorbar(cp)
-    ax.set_title(function[0].__name__)
+    ax.set_title(function[0].__name__ + " iteration: " + str(iteration))
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Langtitude")
     ax.set_xlim([rangex[0], rangex[1]])
