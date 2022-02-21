@@ -2,7 +2,6 @@ import functions
 import plots
 import EvolutionaryAlgorithms
 
-global plot_range
 global params
 global func
 
@@ -17,7 +16,8 @@ epochs = 100
 selection_percentage = 0.95
 error_range = [-0.15,0.15]
 
-ea = EvolutionaryAlgorithms.EA(pop_size, selection_percentage, error_range)
+
+ea = EvolutionaryAlgorithms.EA(pop_size, selection_percentage, error_range, params)
 
 filenames = []
 for i in range(epochs):
