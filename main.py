@@ -8,16 +8,16 @@ global func
 #initialize
 plot_range = [[-2, 2], [-2, 2]]
 params = [1.,10.]
-func = [functions.rosenbrock, [0, 10]]
+func = [functions.rastrigin, [0, 10]]
 #Hyperparameters initialization
 pop_size = 99
-function = [functions.rosenbrock, [0, 10]]
+function = [functions.rastrigin, [-2, -2]]
 epochs = 100
 selection_percentage = 0.95
 error_range = [-0.15,0.15]
 
 
-ea = EvolutionaryAlgorithms.EA(pop_size, selection_percentage, error_range, params)
+ea = EvolutionaryAlgorithms.EA(pop_size, selection_percentage, error_range, params, func)
 
 filenames = []
 for i in range(epochs):

@@ -2,22 +2,21 @@ import random
 import numpy as np
 import functions
 
-#graph parameters initialization
-params = [1.,10.]
-func = [functions.rosenbrock, [0, 10]]
+
 
 class EA():
     parms = None
-    def __init__(self, pop_size, sel_perc, error_range, params):
+    def __init__(self, pop_size, sel_perc, error_range, params, func):
         self.param = params
-        self.population = [Individual([np.random.uniform(-2,2),np.random.uniform(-2, 2)], self.param) for _ in range(pop_size)]
+        self.func = func
+        self.population = [Individual([np.random.uniform(-2,2),np.random.uniform(-2, 2)], self.param, self.func) for _ in range(pop_size)]
         self.pop_size = pop_size
         self.sel_perc = sel_perc
         self.error_range = error_range
 
 
     def evaluate(self):
-        return [individual.evaluate(self.param) for individual in self.population]
+        return [individual.evaluate(self.param, self.func) for individual in self.population]
 
     def selection(self):
         self.population.sort(key=lambda s: s.score)
@@ -41,7 +40,7 @@ class EA():
         return children
 
     def birth(self, parent_1,parent_2):
-        child = Individual([np.mean([parent_1.dna[0], parent_2.dna[0]]), np.mean([parent_1.dna[1], parent_2.dna[1]])], self.param)
+        child = Individual([np.mean([parent_1.dna[0], parent_2.dna[0]]), np.mean([parent_1.dna[1], parent_2.dna[1]])], self.param,self.func)
         return child
 
     def mutation(self, children):
@@ -65,12 +64,13 @@ class EA():
 
 
 class Individual():
-    def __init__(self, dna, param):
+    def __init__(self, dna, param, func):
+        self.func = func
         self.param = param
         self.dna = dna # float number
         self.score = func[0](self.dna, param)
 
-    def evaluate(self, parm):
+    def evaluate(self, parm, func):
         self.score = func[0](self.dna, parm)
         return func[0](self.dna, parm)
 
@@ -78,4 +78,4 @@ class Individual():
         return self.__str__()
 
     def __str__(self):
-        return "individual DNA: " + str(self.dna) + " and loss: " + str(self.evaluate(self.param))
+        return "individual DNA: " + str(self.dna) + " and loss: " + str(self.evaluate(self.param, self.func))
