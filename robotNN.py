@@ -42,10 +42,6 @@ class RobotNN():
             self.activations[i + 1] = activations
             print(activations)
         return activations
-        
-
-
- 
 
 class RobotEA():
     def __init__(self, robotNN, pop_size, select_perc, error_range):
@@ -125,15 +121,14 @@ if __name__ == '_main_':
 
     #  Network(Layer(10, 'relu'), Layer(4, 'relu'), Layer(2, 'linear'))
 
-    weights = [np.random.rand(15, 5), np.random.rand(5, 2)]
-    input = [np.random.rand(1,15)]
+    network = RobotNN()
 
     pop_size = 100
     select_perc = 0.9
     error_range = 0.5
     epochs = 100
 
-    robot = RobotNN(weights)
+    robot = RobotNN(network.weights)
     robotEA = RobotEA(robot, pop_size, select_perc, error_range)
     for epoch in range(epochs):
         robotEA.run()
