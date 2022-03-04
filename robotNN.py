@@ -48,21 +48,92 @@ class RobotNN():
  
 
 class RobotEA():
-    def __init__(self):
-        pass
+    def __init__(self, robotNN, pop_size, select_perc, error_range):
+        self.robotNN = robotNN
+        self.population = [Individual(robotNN.weights) for _ in range(pop_size)]
+        self.pop_size = pop_size
+        self.select_perc = select_perc
+        self.error_range = error_range
+
 
     def evaluate(self):
-        pass
+        return [individual.evaluate() for individual in self.population]
 
     def selection(self):
-        pass
+        self.population.sort(key=lambda s: s.score)
+        selected = self.population[:int(self.select_perc * (len(self.population)))]
+        return selected
 
-    def crossover(self):
-        pass
+    def crossover(self, selected):
+        children = []
+        # create couples that will give birth
+        parent_1 = [selected[rand] for rand in
+                    np.random.randint(len(selected), size=int(self.pop_size))]
+        parent_2 = [selected[rand] for rand in np.random.randint(len(selected), size=int(self.pop_size))]
+        for i in range(int(self.pop_size)):
+            # Crossover
+            child = self.birth(parent_1[i], parent_2[i])
+            children.append(child)
+        return children
 
-    def mutation(self):
-        pass
+    def birth(self, parent_1,parent_2):
+        weights = []
+        for i in range(len(self.robotNN.weights)):
+            weights.append(np.mean(np.array([parent_1.dna[i], parent_2.dna[i]]), axis=0))
+        child = Individual(weights)
+        return child
+
+    def mutation(self, children):
+        for i in range(self.pop_size):
+            if random.random() > self.select_perc:
+                # TODO change how noise is added(what we do now is we create a random matrix and add it)
+                weights = []
+                for j in range(len(self.robotNN.weights)):
+                    weights.append(children[i].dna[j] + (0.01 * np.random.rand(*children[i].dna[j].shape)))
+                children[i].dna = weights
+        return children
+
+    def run(self):
+        #life cycle
+        selected = self.selection()
+        children = self.crossover(selected)
+        children = self.mutation(children)
+        self.population = children
+
+class Individual():
+    def __init__(self, dna):
+        # TODO create robot here : dna = weights
+        self.dna = dna # float number
+        self.score = self.evaluate()
+
+    def evaluate(self):
+        # TODO evaluation function goes here
+
+        # nn feed forward
+        # evaluation function
+        #return fitness
+        return 1
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return 'Robot score: ' + self.score
 
 
-#if _name_ == '_main_':
- #   Network(Layer(10, 'relu'), Layer(4, 'relu'), Layer(2, 'linear'))
+if __name__ == '_main_':
+
+    #  Network(Layer(10, 'relu'), Layer(4, 'relu'), Layer(2, 'linear'))
+
+    weights = [np.random.rand(15, 5), np.random.rand(5, 2)]
+    input = [np.random.rand(1,15)]
+
+    pop_size = 100
+    select_perc = 0.9
+    error_range = 0.5
+    epochs = 100
+
+    robot = RobotNN(weights)
+    robotEA = RobotEA(robot, pop_size, select_perc, error_range)
+    for epoch in range(epochs):
+        robotEA.run()
