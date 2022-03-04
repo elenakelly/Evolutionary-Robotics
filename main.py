@@ -17,7 +17,7 @@ selection_percentage = 0.95
 error_range = [-0.15,0.15]
 
 
-ea = EvolutionaryAlgorithms.EA(pop_size, selection_percentage, error_range, params, func)
+ea = EA.EA(pop_size, selection_percentage, error_range, params, func)
 
 filenames = []
 for i in range(epochs):
