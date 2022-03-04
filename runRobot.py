@@ -1,5 +1,6 @@
 
 from matplotlib import pyplot as plt
+from robotNN import  RobotNN, RobotEA
 
 
 def plot():
@@ -11,13 +12,11 @@ def plot():
     plt.show()
 
 def train(iterations):
+    #call robotNN & robotEA and train it 
     pass
 
-def display_result(iterations):
-    pass
 
 
 if __name__ == "__main__":
     iterations = 50
     train(iterations)
-    display_result(iterations)
