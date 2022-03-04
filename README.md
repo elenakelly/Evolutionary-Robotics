@@ -14,4 +14,11 @@ To do:</br>
 * fix collision </br>
 * create the EA for the robot</br>
 * create the NN for the robot</br>
+* combine/fix EA with NN</br>
+* add memory</br>
+* add update function for velocities</br>
+* add dust</br>
+* add fitness </br>
+* find a visual solution</br>
+* show evolution of fitness (max + average)</br>
 * run experiments</br>
