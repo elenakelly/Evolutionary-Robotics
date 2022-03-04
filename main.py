@@ -1,15 +1,27 @@
 import functions
-from EA import EA
+import plots
+import EA
 
-if __name__ == "__main__":
-    
-    # Objective Function and the parameters it takes
-    #function = [functions.rosenbrock, [0, 10]]
-    function = [functions.rastrigin, [10]]
+global params
+global func
 
-    # Plot Range
-    plot_range = [[-10000, 10000], [-10000, 10000]]  # Better for Rastrigin
-    # plot_range = [[-2, 2], [-1, 3]]  # Better for Rosenbrock
+#initialize
+plot_range = [[-2, 2], [-2, 2]]
+params = [1.,10.]
+func = [functions.rastrigin, [0, 10]]
+#Hyperparameters initialization
+pop_size = 99
+function = [functions.rastrigin, [-2, -2]]
+epochs = 100
+selection_percentage = 0.95
+error_range = [-0.15,0.15]
 
-    # Run EA
-    EA()
+
+ea = EvolutionaryAlgorithms.EA(pop_size, selection_percentage, error_range, params, func)
+
+filenames = []
+for i in range(epochs):
+    print("iteration: " + str(i))
+    ea.run()
+    filenames.append(plots.plotGraphs(ea.population, func, i, plot_range))
+plots.createGif(filenames, name="EA.gif")
