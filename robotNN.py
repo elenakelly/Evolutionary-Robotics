@@ -26,7 +26,8 @@ class RobotNN():
         for i in range(len(layers)):
             a = np.zeros(layers[i])
             activations.append(a)
-        self.activations = activations    
+        self.activations = activations  
+          
     
     #implement forwardpropagation
     def forward_propagate(self,inputs):      
