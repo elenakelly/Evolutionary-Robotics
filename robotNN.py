@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 class RobotNN():
-    def _init_(self, n_nodes, n_neurons):
+    def _init_(self):
         self.num_inputs = 10
         self.num_hidden = 4
         self.num_outputs = 2
