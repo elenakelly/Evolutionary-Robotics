@@ -3,8 +3,8 @@ import numpy as np
 import random
 
 class RobotNN():
-    def __init__(self, *args):
-        if len(args) <= 1:
+    def __init__(self, args):
+        if args is None :
             self.num_inputs = 10
             self.num_hidden = 4
             self.num_outputs = 2
@@ -22,13 +22,6 @@ class RobotNN():
             self.weights = weights
             self.biases = biases
 
-            #create activations
-            activations =[]
-            for i in range(len(layers)):
-                a = np.zeros(layers[i])
-                activations.append(a)
-            self.activations = activations
-
             # create activations
             activations = []
             for i in range(len(layers)):
@@ -36,8 +29,15 @@ class RobotNN():
                 activations.append(a)
             self.activations = activations
 
-        elif len(args) > 1:
-            pass
+        else:
+            layers = args
+            # create activations
+            activations = []
+            for i in range(len(layers)):
+                a = np.zeros(layers[i])
+                activations.append(a)
+            self.activations = activations
+            
 
 
     #implement forwardpropagation
@@ -57,7 +57,7 @@ class RobotNN():
 
 class RobotEA():
     def __init__(self, pop_size, select_perc, error_range):
-        self.population = [Individual(RobotNN()) for _ in range(pop_size)]
+        self.population = [Individual(RobotNN(None)) for _ in range(pop_size)]
         self.pop_size = pop_size
         self.select_perc = select_perc
         self.error_range = error_range
