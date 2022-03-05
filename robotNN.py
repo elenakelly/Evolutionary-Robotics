@@ -102,25 +102,21 @@ class RobotEA():
 
     def run(self):
         #life cycle
-        print(self.population[0].dna[0][...,:])
         selected = self.selection()
-        print(selected[0].dna[0][..., :])
         children = self.crossover(selected)
         children = self.mutation(children)
         self.population = children
 
+        return self.population
+
 class Individual():
     def __init__(self, robot):
         self.dna = robot.weights # float number
-        self.score = self.evaluate()
+        self.score = 0
 
-    def evaluate(self):
+    def evaluate(self, score):
         # TODO evaluation function goes here
-
-        #run model
-            # steer the wheel with the respect to the NN
-        # return evaluation function / fitness
-        return np.random.rand()
+        self.score = score
 
     def __repr__(self):
         return self.__str__()
@@ -129,3 +125,13 @@ class Individual():
         return 'Robot score: ' + self.score
 
 
+#Testing area
+if __name__ == '__main__':
+    pop_size = 100
+    select_perc = 0.9
+    error_range = 0.5
+    epochs = 100
+
+    robotEA = RobotEA(pop_size, select_perc, error_range)
+    for epoch in range(epochs):
+        robotEA.run()

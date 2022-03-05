@@ -5,7 +5,6 @@ import math
 import os
 
 os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
-
 #os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # images
@@ -51,7 +50,7 @@ class RobotMove:
         self.rect = pygame.Rect(self.x, self.y, 60, 60)
         self.rotated = self.img
         self.rect = self.rotated.get_rect(center =(self.x,self.y))
-    
+
 
     # draw and rotate the image
     def draw(self, win):
@@ -110,7 +109,7 @@ class RobotMove:
                     self.y = rotation[1]
                 self.theta = rotation[2]
 
-        
+
         self.rotated =pygame.transform.rotozoom(self.img,math.degrees(self.theta),1)
         self.rect = self.rotated.get_rect(center = (self.x,self.y))
 
@@ -302,6 +301,7 @@ class Wall():
 
 population=20
 for i in range(population):
+    print(i)
     # initialisation of game
     pygame.font.init()
 
@@ -352,7 +352,6 @@ for i in range(population):
 
     # simulation loop
     for _ in range(500):
-        print(_)
         # activate quit button
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

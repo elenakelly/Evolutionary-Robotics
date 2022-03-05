@@ -1,11 +1,9 @@
-
 from matplotlib import pyplot as plt
-
-from robotNN import  RobotNN, RobotEA
+from robotNN import RobotNN, RobotEA
 import pygame
-from robot import PlayRobot, RobotMove, Envir, Wall, PlayRobot, Raycasting
+import robot
 
-# initialisation of game
+'''# initialisation of game
 pygame.font.init()
 
 # images
@@ -78,7 +76,7 @@ while run:
     enviroment.trail((player_robot.x, player_robot.y))
     player_robot.draw(enviroment.map)
     player_robot.upd_rect()
-    Raycasting.cast_rays(SCREEN, walls)
+    cast_rays(SCREEN, walls)
 
     # ---
 
@@ -95,11 +93,29 @@ def plot():
 
     plt.title("Average evaluations per iteration")
     plt.show()
-
+'''
 def train(iterations):
-    #call robotNN & robotEA and train it 
-    pass
 
+
+
+    pop_size = 100
+    select_perc = 0.9
+    error_range = 0.5
+    epochs = 100
+
+    robotEA = RobotEA(pop_size, select_perc, error_range)
+    for epoch in range(epochs):
+        for individual in robotEA.population:
+            weights = individual.dna
+
+            # TODO call robotNN to compute the movement vector
+
+            # TODO run simulation
+            score = None
+
+            individual.score = score
+
+            #so now we have all robots scores updated given the NN output(fed with weights)
 
 if __name__ == "__main__":
     iterations = 50
