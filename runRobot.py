@@ -19,7 +19,7 @@ images = [(BACKGROUND, (0, 0))]
 # the robot
 player_robot = PlayRobot()
 
-neural_network = RobotNN()
+
 
 # walls
 wall_list = [Wall(100, 200, 300, 10), Wall(
@@ -94,6 +94,9 @@ def plot():
     plt.title("Average evaluations per iteration")
     plt.show()
 '''
+neural_network = RobotNN()
+[vl,vr] = RobotNN.forward_propagate()
+
 def train(iterations):
 
 
