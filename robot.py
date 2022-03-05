@@ -4,31 +4,16 @@ import numpy as np
 import math
 import os
 
-# os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
+os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
 
-# initialisation of game
-pygame.font.init()
+#os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 # images
-#BACKGROUND = pygame.image.load("images/background.png")
+BACKGROUND = pygame.image.load("images/background.png")
 ROBOT = pygame.image.load("images/vacuum.png")
 WALLTT = pygame.image.load("images/wallTT.png")
 ICON = pygame.image.load('images/icon.png')
 
-# main sceen
-WIDTH, HEIGHT = 800, 600  # dimentions
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-# window setting
-pygame.display.set_caption("Mobile Robot Simulator")
-pygame.display.set_icon(ICON)
-pygame.rect.Rect
-MAIN_FONT = pygame.font.SysFont("comicsans", 22)
-SENSORS_FONT = pygame.font.SysFont("comicsans", 12)
-
-
-# SENSORS - Divide circumference by number of sensors
-STEP_ANGLE = (math.pi*2) / 12
-# -------
 def blit_rotate_center(win, image, top_left, angle):
     rotated_image = pygame.transform.rotozoom(image, angle,1)
     new_rect = rotated_image.get_rect(
@@ -40,9 +25,9 @@ def blit_text_center(win, font, text):
     win.blit(render, (win.get_width()/2 - render.get_width() /
                       2, win.get_height()/2 - render.get_height()/2))
 
-
-
 # Robot movement
+
+
 class RobotMove:
     def __init__(self):
         self.trail_set = []
@@ -118,7 +103,7 @@ class RobotMove:
                     [ICC[0], ICC[1], w * dt])).transpose()
 
                 u_col, b_col, r_col, l_col = self.is_colliding()
-                print(u_col or b_col)
+                #print(u_col or b_col)
                 if not (l_col or r_col):
                     self.x = rotation[0]
                 if not (u_col or b_col):
@@ -180,51 +165,52 @@ class PlayRobot(RobotMove):
 
 
 # Raycasting
-class Raycasting:
-    def cast_rays(screen, walls):
 
-        all_sensors = []
 
-        sensor_x = player_robot.x+(ROBOT.get_width()/2)
-        sensor_y = player_robot.y+(ROBOT.get_height()/2)
+def cast_rays(screen, walls):
 
-        temp_angle = 0
-        for i in range(12):
-            all_sensors.append((sensor_x, sensor_y, temp_angle, temp_angle, i))
-            temp_angle += STEP_ANGLE
+    all_sensors = []
 
-        for sensor in all_sensors:
+    sensor_x = player_robot.x+(ROBOT.get_width()/2)
+    sensor_y = player_robot.y+(ROBOT.get_height()/2)
 
-            clipped_line = None
+    temp_angle = 0
+    for i in range(12):
+        all_sensors.append((sensor_x, sensor_y, temp_angle, temp_angle, i))
+        temp_angle += STEP_ANGLE
 
-            for depth in range(200):
-                target_x = sensor[0] - math.sin(sensor[2]) * depth
-                target_y = sensor[1] + math.cos(sensor[3]) * depth
+    for sensor in all_sensors:
 
-                ray = ((sensor_x, sensor_y), (target_x, target_y))
+        clipped_line = None
 
-                for i in range(len(walls)):
-                    clipped_line = walls[i].clipline(ray)
-                    if clipped_line:
-                        break
+        for depth in range(200):
+            target_x = sensor[0] - math.sin(sensor[2]) * depth
+            target_y = sensor[1] + math.cos(sensor[3]) * depth
 
-            sensor_placement_offset = 8
-            sensor_placement_radius_depth = 64
-            sensor_placement_x = sensor[0] - math.sin(
-                sensor[2]) * sensor_placement_radius_depth - sensor_placement_offset
-            sensor_placement_y = sensor[1] + math.cos(
-                sensor[3]) * sensor_placement_radius_depth - sensor_placement_offset
-            collision_offset = 29
-            if clipped_line:
-                sensor_distance = int(
-                    math.sqrt((clipped_line[0][1]-sensor_y)**2 + (clipped_line[0][0]-sensor_x)**2))-collision_offset
-            else:
-                sensor_distance = 200
+            ray = ((sensor_x, sensor_y), (target_x, target_y))
 
-            sensor_text = SENSORS_FONT.render(
-                f"{sensor_distance}", 1, (255, 255, 255))
-            screen.blit(
-                sensor_text, (sensor_placement_x, sensor_placement_y))
+            for i in range(len(walls)):
+                clipped_line = walls[i].clipline(ray)
+                if clipped_line:
+                    break
+
+        sensor_placement_offset = 8
+        sensor_placement_radius_depth = 64
+        sensor_placement_x = sensor[0] - math.sin(
+            sensor[2]) * sensor_placement_radius_depth - sensor_placement_offset
+        sensor_placement_y = sensor[1] + math.cos(
+            sensor[3]) * sensor_placement_radius_depth - sensor_placement_offset
+        collision_offset = 29
+        if clipped_line:
+            sensor_distance = int(
+                math.sqrt((clipped_line[0][1]-sensor_y)**2 + (clipped_line[0][0]-sensor_x)**2))-collision_offset
+        else:
+            sensor_distance = 200
+
+        sensor_text = SENSORS_FONT.render(
+            f"{sensor_distance}", 1, (255, 255, 255))
+        screen.blit(
+            sensor_text, (sensor_placement_x, sensor_placement_y))
 
     # ------------
 
@@ -314,10 +300,93 @@ class Wall():
     def draw(self, screen):
         pygame.draw.rect(screen, (0, 51, 0), self.rect)
 
+population=20
+for i in range(population):
+    # initialisation of game
+    pygame.font.init()
 
-# the robot
-player_robot = PlayRobot()
 
-# walls
-wall_list = [Wall(100, 200, 300, 10), Wall(
-    100, 200, 10, 300), Wall(400, 10, 10, 300)]
+
+    # main sceen
+    WIDTH, HEIGHT = 800, 600  # dimentions
+    SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+    # window setting
+    pygame.display.set_caption("Mobile Robot Simulator")
+    pygame.display.set_icon(ICON)
+    pygame.rect.Rect
+    MAIN_FONT = pygame.font.SysFont("comicsans", 22)
+    SENSORS_FONT = pygame.font.SysFont("comicsans", 12)
+
+    # SENSORS - Divide circumference by number of sensors
+    STEP_ANGLE = (math.pi * 2) / 12
+    # -------
+
+    # running game or not
+    run = True
+
+    images = [(BACKGROUND, (0, 0))]
+    # the robot
+    player_robot = PlayRobot()
+    # walls
+    wall_list = [Wall(100, 200, 300, 10), Wall(
+        100, 200, 10, 300), Wall(400, 10, 10, 300)]
+
+    # enviroment prints
+    enviroment = Envir([600, 800])
+    walls = Envir.setWalls()
+
+    for wall in wall_list:
+        walls.append(wall.rect)
+
+    # Test Wall
+    # WallTTRect = pygame.Rect(542, 142, WALLTT.get_width(), WALLTT.get_height())
+    # walls.append(WallTTRect)
+    # ----
+
+    # dt
+    dt = 50
+    clock = pygame.time.Clock()
+    FPS = 60
+
+
+
+    # simulation loop
+    for _ in range(500):
+        print(_)
+        # activate quit button
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        # timer
+        clock.tick(FPS)
+
+        # activate buttons
+        keys = pygame.key.get_pressed()
+        key = [keys[pygame.K_w], keys[pygame.K_s], keys[pygame.K_o], keys[pygame.K_l],
+               keys[pygame.K_t], keys[pygame.K_g], keys[pygame.K_x]]
+
+        # run the robot
+        activate = player_robot.move(key, dt)
+        player_robot.collide()
+
+        # visualize objects
+
+        # wall_collision(player_robot, SCREEN, WallRect)
+
+        enviroment.draw(SCREEN, images, player_robot)
+        for wall in wall_list:
+            wall.draw(SCREEN)
+        enviroment.robot_frame(
+            (player_robot.x, player_robot.y), player_robot.theta)
+        enviroment.trail((player_robot.x, player_robot.y))
+        player_robot.draw(enviroment.map)
+        player_robot.upd_rect()
+        cast_rays(SCREEN, walls)
+
+        # ---
+
+        pygame.display.update()
+
+    # exit the game
+    pygame.quit()

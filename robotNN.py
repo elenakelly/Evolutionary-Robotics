@@ -129,13 +129,3 @@ class Individual():
         return 'Robot score: ' + self.score
 
 
-if __name__ == '__main__':
-
-    pop_size = 100
-    select_perc = 0.9
-    error_range = 0.5
-    epochs = 100
-
-    robotEA = RobotEA(pop_size, select_perc, error_range)
-    for epoch in range(epochs):
-        robotEA.run()
