@@ -110,7 +110,8 @@ def train(iterations):
     for epoch in range(epochs):
         for individual in robotEA.population:
             weights = individual.dna
-
+            print('hello')
+            robot = robot.Robot()
             # TODO call robotNN to compute the movement vector
 
             # TODO run simulation
