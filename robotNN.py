@@ -2,8 +2,8 @@ import numpy as np
 import random
 
 class RobotNN():
-    def __init__(self, args):
-        if args is None :
+    def __init__(self, weights=None):
+        if weights is None:
             self.num_inputs = 10
             self.num_hidden = 4
             self.num_outputs = 2
@@ -28,16 +28,14 @@ class RobotNN():
                 activations.append(a)
             self.activations = activations
 
-        else:
-            layers = args
+        elif weights is not None:
+            layers = weights
             # create activations
             activations = []
             for i in range(len(layers)):
                 a = np.zeros(layers[i])
                 activations.append(a)
             self.activations = activations
-            
-
 
     #implement forwardpropagation
     def forward_propagate(self,inputs):
@@ -51,20 +49,20 @@ class RobotNN():
             activations = 1.0/(1+np.exp(-net_inputs))
             # save the activations for backpropogation
             self.activations[i + 1] = activations
-            print(activations)
+            #print(activations)
         return activations
 
 class RobotEA():
     def __init__(self, pop_size, select_perc, error_range):
-        self.population = [Individual(RobotNN(None)) for _ in range(pop_size)]
+        self.population = [Individual(RobotNN()) for _ in range(pop_size)]
         self.pop_size = pop_size
         self.select_perc = select_perc
         self.error_range = error_range
 
 
-    def evaluate(self):
+    '''def evaluate(self):
         return [individual.evaluate() for individual in self.population]
-
+'''
     def selection(self):
         self.population.sort(key=lambda s: s.score)
         selected = self.population[:int(self.select_perc * (len(self.population)))]
@@ -85,14 +83,15 @@ class RobotEA():
     def birth(self, parent_1,parent_2):
         weights = []
         for i in range(len(parent_1.dna)):
+            # for every layer average
             weights.append(np.mean(np.array([parent_1.dna[i], parent_2.dna[i]]), axis=0))
-        child = Individual(RobotNN(weights))
+        child = Individual(RobotNN(weights=weights))
         return child
 
     def mutation(self, children):
         for i in range(self.pop_size):
             if random.random() > self.select_perc:
-                # TODO change how noise is added(what we do now is we create a random matrix and add it)
+                # TODO change how noise is added(what we do now is we create a random matrix and then we add it to the first one)
                 weights = []
                 for j in range(len(children[i].dna)):
                     weights.append(children[i].dna[j] + (0.001 * np.random.rand(*children[i].dna[j].shape)))
@@ -109,12 +108,12 @@ class RobotEA():
         return self.population
 
 class Individual():
-    def __init__(self, robot):
-        self.dna = robot.weights # float number
+    def __init__(self, NN):
+        self.NN = NN
+        self.dna = NN.weights # float number
         self.score = 0
 
     def evaluate(self, score):
-        # TODO evaluation function goes here
         self.score = score
 
     def __repr__(self):

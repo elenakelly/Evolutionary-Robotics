@@ -303,10 +303,10 @@ class Robot(object):
     def __init__(self, weights):
         self.Main(weights)
 
-    def Main(self, weights):
+    def Main(self, NN):
         pygame.init()
 
-        print(weights)
+        inputs = np.random.rand(1,10)
 
         # images
         BACKGROUND = pygame.image.load("images/background.png")
@@ -343,12 +343,6 @@ class Robot(object):
             walls.append(wall.rect)
 
         player_robot = PlayRobot(ROBOT)
-        population = 20
-
-
-
-        # running game or not
-        run = True
 
         # Test Wall
         # WallTTRect = pygame.Rect(542, 142, WALLTT.get_width(), WALLTT.get_height())
@@ -362,10 +356,13 @@ class Robot(object):
 
         # simulation loop
         for _ in range(500):
+
+            motor = NN.forward_propagate(inputs)
+            print('motor: ', motor)
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    run = False
+                    break
 
             # timer
             clock.tick(FPS)
