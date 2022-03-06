@@ -300,12 +300,13 @@ class Wall():
 
 class Robot(object):
 
-    def __init__(self):
-        self.Main()
+    def __init__(self, weights):
+        self.Main(weights)
 
-    def Main(self):
+    def Main(self, weights):
         pygame.init()
 
+        print(weights)
 
         # images
         BACKGROUND = pygame.image.load("images/background.png")

@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 from robotNN import RobotNN, RobotEA
 import pygame
-import robot
+import Robot
 
 '''# initialisation of game
 pygame.font.init()
@@ -94,27 +94,29 @@ def plot():
     plt.title("Average evaluations per iteration")
     plt.show()
 '''
-neural_network = RobotNN()
-[vl,vr] = RobotNN.forward_propagate()
+#neural_network = RobotNN()
+#[vl,vr] = RobotNN.forward_propagate()
 
 def train(iterations):
-
-
-
     pop_size = 100
     select_perc = 0.9
     error_range = 0.5
     epochs = 100
 
+    #initialize robot
     robotEA = RobotEA(pop_size, select_perc, error_range)
     for epoch in range(epochs):
         for individual in robotEA.population:
             weights = individual.dna
-            print('hello')
-            robot = robot.Robot()
+
+
             # TODO call robotNN to compute the movement vector
 
-            # TODO run simulation
+            #init new robot
+            robot = Robot.Robot(weights)
+
+
+            #ιon
             score = None
 
             individual.score = score
