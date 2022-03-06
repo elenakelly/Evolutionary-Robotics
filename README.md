@@ -15,6 +15,7 @@ To do:</br>
 * create the EA for the robot</br>
 * create the NN for the robot</br>
 * combine/fix EA with NN</br>
+* combine/fix Robot with NN</br>
 * add memory</br>
 * add update function for velocities</br>
 * add dust</br>
