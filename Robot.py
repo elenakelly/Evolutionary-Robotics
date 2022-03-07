@@ -50,6 +50,7 @@ class RobotMove:
         self.dustCleared = 0
         self.wallCollisions = 0
         self.hasCollided = False
+ 
 
     # draw and rotate the image
 
@@ -57,7 +58,53 @@ class RobotMove:
         blit_rotate_center(win, self.img, (self.x, self.y),
                            math.degrees(-self.theta))
 
-    def move(self, keys, dt, wall_list, screen, width, height):
+    def simulation_move(self, vl, vr, dt, wall_list, screen):
+        
+        self.vl = vl
+        self.vr = vr
+        next_x, next_y = self.x, self.y
+
+        # check model
+        if self.vr != 0 or self.vl != 0:
+            if self.vl == self.vr:
+                next_x = self.x + ((self.vl+self.vr)/2) * \
+                    np.cos(-self.theta) * dt
+                next_y = self.y - ((self.vl+self.vr)/2) * \
+                    np.sin(-self.theta) * dt
+                R = np.inf
+                w = 0
+            else:
+                R = (self.l/2) * (self.vl + self.vr) / (self.vr - self.vl)
+                w = (self.vr - self.vl) / self.l
+
+            # Computation of ICC
+
+                centerx = self.x+(self.img.get_width()/2)
+                centery = self.y+(self.img.get_height()/2)
+                ICC = [centerx - R * np.sin(self.theta),
+                       centery + R * np.cos(self.theta)]
+
+                a = [[np.cos(w * dt), -np.sin(w * dt), 0],
+                     [np.sin(w * dt), np.cos(w * dt), 0], [0, 0, 1]]
+                b = [centerx - ICC[0], centery - ICC[1], self.theta]
+                rotation = np.dot(a, b)
+                rotation = rotation + [ICC[0], ICC[1], w * dt]
+
+                pygame.draw.line(screen, (255, 255, 0), (centerx, centery),
+                                 (ICC[0], ICC[1]), 3)
+                pygame.display.flip()
+
+                next_x = rotation[0]-(self.img.get_width()/2)
+                next_y = rotation[1]-(self.img.get_height()/2)
+                self.theta = rotation[2]
+
+        self.rotated = pygame.transform.rotozoom(
+            self.img, math.degrees(self.theta), 1)
+        # self.rect = self.rotated.get_rect(center=(self.x, self.y))
+
+        self.collide2((self.x, self.y), (next_x, next_y), wall_list)
+        # self.collide((self.x, self.y), (next_x, next_y),width,height)
+    def move(self, keys, dt, wall_list, screen):
 
         # setting the buttons
         if keys[0] == 1:
@@ -116,8 +163,7 @@ class RobotMove:
                 next_y = rotation[1]-(self.img.get_height()/2)
                 self.theta = rotation[2]
 
-        self.rotated = pygame.transform.rotozoom(
-            self.img, math.degrees(self.theta), 1)
+        self.rotated = pygame.transform.rotozoom(self.img, math.degrees(self.theta), 1)
         # self.rect = self.rotated.get_rect(center=(self.x, self.y))
 
         self.collide2((self.x, self.y), (next_x, next_y), wall_list)
@@ -781,8 +827,10 @@ class Robot(object):
         # simulation loop
         for _ in range(500):
 
-            motor = NN.forward_propagate(inputs)
-            print('motor: ', motor)
+            [vl,vr] = NN.forward_propagate(inputs)[1]
+            activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
+            #motor = NN.forward_propagate(inputs)
+            print('motor: ', [vl,vr])
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -797,10 +845,9 @@ class Robot(object):
                    keys[pygame.K_t], keys[pygame.K_g], keys[pygame.K_x]]
 
             # run the robot
-            activate = player_robot.move(
-                key, dt, wall_list, SCREEN, WIDTH, HEIGHT)
+            activate = player_robot.move(key, dt, wall_list, SCREEN)
             # player_robot.collide(WIDTH, HEIGHT)
-
+ 
             # visualize objects
 
             # wall_collision(player_robot, SCREEN, WallRect)
