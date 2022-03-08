@@ -1,8 +1,8 @@
 from runRobot import RunRobot
 
-iterations = 50
+iterations = 10
 
-pop_size = 100
+pop_size = 5
 select_perc = 0.9
 error_range = 0.1
 
