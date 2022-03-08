@@ -2,22 +2,32 @@ import numpy as np
 
 
 class network():
-    def __init__(self, weights):
+    def __init__(self, weights=None):
         self.num_inputs = 16
         self.num_hidden = 4
         self.num_outputs = 2
         self.feedback = [0, 0, 0, 0]
         self.weights = weights
 
-        self.hidden_layer1 = network.layer(16, 4)
-        self.act_sigmoid1 = network.Activation_Sigmoid()
-        self.output_layer2 = network.layer(4, 2)
-        self.act_tanh = network.Activation_Tanh()
+        if weights is None:
+            self.hidden_layer1 = network.layer(16, 4)
+            self.act_sigmoid1 = network.Activation_Sigmoid()
+            self.output_layer2 = network.layer(4, 2)
+            self.act_tanh = network.Activation_Tanh()
+        else:
+            self.hidden_layer1 = network.layer(16, 4, self.weights[0])
+            self.act_sigmoid1 = network.Activation_Sigmoid()
+            self.output_layer2 = network.layer(4, 2, self.weights[1])
+            self.act_tanh = network.Activation_Tanh()
 
     class layer:
-        def __init__(self, n_inputs, n_neurons):
-            self.weights = 0.10 * np.random.randn(n_inputs, n_neurons)
-            self.biases = np.zeros((1, n_neurons))
+        def __init__(self, n_inputs, n_neurons, weights=None):
+            if weights is None:
+                self.weights = 0.10 * np.random.randn(n_inputs, n_neurons)
+                self.biases = np.zeros((1, n_neurons))
+            else:
+                self.weights = weights
+                self.biases = np.zeros((1, n_neurons))
 
         def forward(self, inputs):
             self.output = np.dot(inputs, self.weights) + self.biases
