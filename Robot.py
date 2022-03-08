@@ -1,8 +1,7 @@
 import pygame
-import random
 import numpy as np
 import math
-import os
+import ffnn
 
 # os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -99,10 +98,8 @@ class RobotMove:
 
         self.rotated = pygame.transform.rotozoom(
             self.img, math.degrees(self.theta), 1)
-        # self.rect = self.rotated.get_rect(center=(self.x, self.y))
 
         self.collide2((self.x, self.y), (next_x, next_y), wall_list)
-        # self.collide((self.x, self.y), (next_x, next_y),width,height)
 
     def move(self, keys, dt, wall_list, screen):
 
@@ -165,10 +162,8 @@ class RobotMove:
 
         self.rotated = pygame.transform.rotozoom(
             self.img, math.degrees(self.theta), 1)
-        # self.rect = self.rotated.get_rect(center=(self.x, self.y))
 
         self.collide2((self.x, self.y), (next_x, next_y), wall_list)
-        # self.collide((self.x, self.y), (next_x, next_y),width,height)
 
     def upd_rect(self):
         self.rect.x = self.x
@@ -181,23 +176,10 @@ class RobotMove:
         left_col = [False, 0]
 
         temp_new = next_pos
-        print(cur_pos[0])
-        if cur_pos[0] > 695:
-            print("cur x", cur_pos[0])
-
-        if cur_pos[1] < 40:
-            print("cur y", cur_pos[0])
-
-        detected = []
-        detected_x = []
-        detected_y = []
-
-        # if abs(cur_pos[0] - temp_new[0]) > 10 or abs(cur_pos[1] - temp_new[1]) > 10:
 
         incremented_x = cur_pos[0]
         incremented_y = cur_pos[1]
 
-        # if cur_pos[0] != temp_new[0] and cur_pos[1] != temp_new[1]:
         # MOVING LEFT UP
         if cur_pos[0] >= temp_new[0] and cur_pos[1] > temp_new[1]:
 
@@ -231,14 +213,6 @@ class RobotMove:
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
                                 self.img.get_width()
-
-                        # if not (uper_col[0] or bottom_col[0] or right_col[0] or left_col[0]):
-                        #     if switch_increment:
-                        #         bottom_col[0] = True
-                        #         bottom_col[1] = wall.rect.bottom
-                        #     else:
-                        #         right_col[0] = True
-                        #         right_col[1] = wall.rect.right
 
                 if incremented_x <= temp_new[0] or right_col[0] or left_col[0]:
                     searching[0] = False
@@ -297,15 +271,6 @@ class RobotMove:
                             left_col[1] = wall.rect.left - \
                                 self.img.get_width()
 
-                        # if switch_increment:
-                        #     uper_col[0] = True
-                        #     uper_col[1] = wall.rect.top - \
-                        #         ROBOT.get_height()
-                        # else:
-                        #     left_col[0] = True
-                        #     left_col[1] = wall.rect.left - \
-                        #         ROBOT.get_width()
-
                 if incremented_x >= temp_new[0] or right_col[0] or left_col[0]:
                     searching[0] = False
                 if incremented_y >= temp_new[1] or uper_col[0] or bottom_col[0]:
@@ -313,30 +278,12 @@ class RobotMove:
 
                 if uper_col[0] and left_col[0]:
 
-                    if bottom_col[1] < 40:
-                        print("cur x", bottom_col[1])
-
-                    if left_col[1]+self.img.get_width() > 695:
-                        print("cur x", left_col[1])
-
                     return uper_col, bottom_col, right_col, left_col
 
                 if uper_col[0] and searching[0] == False:
 
-                    if bottom_col[1] < 40:
-                        print("cur x", bottom_col[1])
-
-                    if left_col[1]+self.img.get_width() > 695:
-                        print("cur x", left_col[1])
-
                     return uper_col, bottom_col, right_col, left_col
                 if left_col[0] and searching[1] == False:
-
-                    if bottom_col[1] < 40:
-                        print("cur x", bottom_col[1])
-
-                    if left_col[1]+self.img.get_width() > 695:
-                        print("cur x", left_col[1])
 
                     return uper_col, bottom_col, right_col, left_col
 
@@ -382,15 +329,6 @@ class RobotMove:
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
                                 self.img.get_width()
-
-                        # if switch_increment:
-                        #     uper_col[0] = True
-                        #     uper_col[1] = wall.rect.top - \
-                        #         ROBOT.get_height()
-                        # else:
-                        #     left_col[0] = True
-                        #     left_col[1] = wall.rect.left - \
-                        #         ROBOT.get_width()
 
                 if incremented_x <= temp_new[0] or left_col[0] or right_col[0]:
                     searching[0] = False
@@ -448,14 +386,6 @@ class RobotMove:
                             left_col[1] = wall.rect.left - \
                                 self.img.get_width()
 
-                        # if switch_increment:
-                        #     bottom_col[0] = True
-                        #     bottom_col[1] = wall.rect.bottom
-                        # else:
-                        #     left_col[0] = True
-                        #     left_col[1] = wall.rect.left - \
-                        #         ROBOT.get_width()
-
                 if incremented_x >= temp_new[0] or left_col[0] or right_col[0]:
                     searching[0] = False
                 if incremented_y <= temp_new[1] or uper_col[0] or bottom_col[0]:
@@ -463,29 +393,12 @@ class RobotMove:
 
                 if bottom_col[0] and left_col[0]:
 
-                    if bottom_col[1] < 40:
-                        print("cur x", bottom_col[1])
-
-                    if left_col[1]+self.img.get_width() > 695:
-                        print("cur x", left_col[1])
                     return uper_col, bottom_col, right_col, left_col
 
                 if bottom_col[0] and searching[0] == False:
 
-                    if bottom_col[1] < 40:
-                        print("cur x", bottom_col[1])
-
-                    if left_col[1]+self.img.get_width() > 695:
-                        print("cur x", left_col[1])
-
                     return uper_col, bottom_col, right_col, left_col
                 if left_col[0] and searching[1] == False:
-
-                    if bottom_col[1] < 40:
-                        print("cur x", bottom_col[1])
-
-                    if left_col[1]+self.img.get_width() > 695:
-                        print("cur x", left_col[1])
 
                     return uper_col, bottom_col, right_col, left_col
 
@@ -498,330 +411,7 @@ class RobotMove:
                         incremented_y = incremented_y - 1
                     switch_increment = not switch_increment
 
-                # for wall in wall_list:
-
-                #     if abs(cur_pos[0] - temp_new[0]) > 15 or abs(cur_pos[1] - temp_new[1]) > 15:
-                #         # pygame.draw.line(SCREEN, (255, 255, 0), (cur_pos[0], cur_pos[1]),
-                #         #                  (next_pos[0], next_pos[1]), 3)
-                #         # pygame.display.flip()
-
-                #         # dif_range = int(abs(cur_pos[0] - next_pos[0]))
-
-                #         ray = (cur_pos[0], cur_pos[1]), (temp_new[0], temp_new[1])
-                #         ray_x = (cur_pos[0], cur_pos[1]), (cur_pos[0], temp_new[1])
-                #         ray_y = (cur_pos[0], cur_pos[1]), (temp_new[0], cur_pos[1])
-
-                #         clipped_line = wall.rect.clipline(ray)
-                #         if clipped_line:
-                #             # detected.append(clipped_line)
-                #             pygame.draw.line(SCREEN, (43, 43, 14), (clipped_line[0][0], clipped_line[0][1]),
-                #                              (clipped_line[1][0], clipped_line[1][1]), 3)
-                #             pygame.display.flip()
-                #             detected.append(clipped_line)
-                #             # print("CLIPPED", clipped_line)
-
-                #         clipped_line_x = wall.rect.clipline(ray_x)
-                #         if clipped_line_x:
-                #             # detected.append(clipped_line)
-                #             pygame.draw.line(SCREEN, (255, 30, 200), (clipped_line_x[0][0], clipped_line_x[0][1]),
-                #                              (clipped_line_x[1][0], clipped_line_x[1][1]), 3)
-                #             pygame.display.flip()
-                #             detected_x.append(clipped_line_x)
-                #             # print("CLIPPED", clipped_line)
-
-                #         clipped_line_y = wall.rect.clipline(ray_y)
-                #         if clipped_line_y:
-                #             # detected.append(clipped_line)
-                #             pygame.draw.line(SCREEN, (0, 30, 200), (clipped_line_y[0][0], clipped_line_y[0][1]),
-                #                              (clipped_line_y[1][0], clipped_line_y[1][1]), 3)
-                #             pygame.display.flip()
-                #             detected_y.append(clipped_line_y)
-                #             # print("CLIPPED", clipped_line)
-
-                # if detected:
-                #     next_x = 0
-                #     next_y = 0
-
-                #     if cur_pos[0] < next_pos[0]:
-
-                #         min_x = 800
-                #         if detected:
-                #             for line in detected:
-                #                 if line[0][0] < min_x:
-                #                     min_x = line[0][0]
-                #         if detected_x:
-                #             for line in detected_x:
-                #                 if line[0][0] < min_x:
-                #                     min_x = line[0][0]
-                #         if detected_y:
-                #             for line in detected_y:
-                #                 if line[0][0] < min_x:
-                #                     min_x = line[0][0]
-
-                #         next_x = min_x-ROBOT.get_width()
-
-                #     elif cur_pos[0] >= next_pos[0]:
-
-                #         max_x = 0
-                #         if detected:
-                #             for line in detected:
-                #                 if line[0][0] > max_x:
-                #                     max_x = line[0][0]
-                #         if detected_x:
-                #             for line in detected_x:
-                #                 if line[0][0] < max_x:
-                #                     max_x = line[0][0]
-                #         if detected_y:
-                #             for line in detected_y:
-                #                 if line[0][0] < max_x:
-                #                     max_x = line[0][0]
-
-                #         next_x = max_x
-
-                #     if cur_pos[1] < next_pos[1]:
-
-                #         min_y = 800
-                #         if detected:
-                #             for line in detected:
-                #                 if line[0][1] < min_y:
-                #                     min_y = line[0][1]
-                #         if detected_x:
-                #             for line in detected_x:
-                #                 if line[0][1] < min_y:
-                #                     min_y = line[0][1]
-                #         if detected_y:
-                #             for line in detected_y:
-                #                 if line[0][1] < min_y:
-                #                     min_y = line[0][1]
-
-                #         next_y = min_y - ROBOT.get_height()
-
-                #     elif cur_pos[1] >= next_pos[1]:
-
-                #         max_y = 0
-                #         if detected:
-                #             for line in detected:
-                #                 if line[0][1] > max_y:
-                #                     max_y = line[0][1]
-                #         if detected_x:
-                #             for line in detected_x:
-                #                 if line[0][1] < max_y:
-                #                     max_y = line[0][1]
-                #         if detected_y:
-                #             for line in detected_y:
-                #                 if line[0][1] < max_y:
-                #                     max_y = line[0][1]
-
-                #         next_y = max_y
-
-                #     next_pos = (next_x, next_y)
-
-                # --------------------------------------
-
-        right_collisions = []
-        left_collisions = []
-        top_collisions = []
-        bottom_collisions = []
         for wall in wall_list:
-
-            if cur_pos[0] == 40:
-                print("here")
-
-            # LEFT MOVEMENT
-            if cur_pos[0] > next_pos[0]:
-                clipped_line = wall.rect.clipline(
-                    (cur_pos[0], cur_pos[1]), (next_pos[0], next_pos[1]))
-                if clipped_line:
-
-                    if clipped_line[0][0] < 400:
-                        print("here")
-                    if abs(clipped_line[0][0] - wall.rect.right) < 10:
-                        # Right collision
-                        right_collisions.append(clipped_line[0][0])
-                    elif abs(next_pos[1] - wall.rect.bottom) < 10:
-                        # Bottom collision
-                        bottom_collisions.append(clipped_line[0][1])
-                    elif abs(next_pos[1] - wall.rect.top) < 10:
-                        # Top collision
-                        top_collisions.append(
-                            clipped_line[0][1] - self.img.get_height())
-                    print(clipped_line)
-            # RIGHT MOVEMENT
-            elif cur_pos[0] < next_pos[0]:
-                clipped_line = wall.rect.clipline(
-                    (cur_pos[0], cur_pos[1]), (next_pos[0], next_pos[1]))
-                if clipped_line:
-
-                    if self.x > 696:
-                        print("here")
-
-                    if abs(clipped_line[0][0] - wall.rect.left) < 10:
-                        # Left collision
-                        left_collisions.append(clipped_line[0][0])
-                    elif abs(next_pos[1] - wall.rect.bottom) < 10:
-                        # Bottom collision
-                        bottom_collisions.append(clipped_line[0][1])
-                    elif abs(next_pos[1] - wall.rect.top) < 10:
-                        # Top collision
-                        top_collisions.append(
-                            clipped_line[0][1] - self.img.get_height())
-                    print(clipped_line)
-
-            # UPWARD MOVEMENT
-            if cur_pos[1] > next_pos[1]:
-                clipped_line = wall.rect.clipline(
-                    (cur_pos[0], cur_pos[1]), (next_pos[0], next_pos[1]))
-                if clipped_line:
-                    if abs(clipped_line[0][1] - wall.rect.bottom) < 10:
-                        # Bottom collision
-                        bottom_collisions.append(clipped_line[0][1])
-                    elif abs(next_pos[1] == wall.rect.bottom) < 10:
-                        # Left collision
-                        left_collisions.append(
-                            clipped_line[0][0] - self.img.get_width())
-                    elif abs(next_pos[1] == wall.rect.top) < 10:
-                        # Right collision
-                        right_collisions.append(
-                            clipped_line[0][0])
-                    print(clipped_line)
-
-            # BOTTOM MOVEMENT
-            elif cur_pos[1] < next_pos[1]:
-                clipped_line = wall.rect.clipline(
-                    (cur_pos[0], cur_pos[1]), (next_pos[0], next_pos[1]))
-                if clipped_line:
-                    if abs(clipped_line[0][1] - wall.rect.top) < 10:
-                        # Top collision
-                        top_collisions.append(clipped_line[0][1])
-                    elif abs(next_pos[1] - wall.rect.bottom) < 10:
-                        # Left collision
-                        left_collisions.append(
-                            clipped_line[0][0] - self.img.get_width())
-                    elif abs(next_pos[1] - wall.rect.top) < 10:
-                        # Right collision
-                        right_collisions.append(
-                            clipped_line[0][0])
-                    print(clipped_line)
-
-        closest_x = 0
-        closest_y = 0
-
-        if right_collisions:
-            closest_x = 0
-            for crash in right_collisions:
-                if crash > closest_x:
-                    closest_x = crash
-        elif left_collisions:
-            closest_x = 10000
-            for crash in left_collisions:
-                if crash < closest_x:
-                    closest_x = crash + 1
-
-        if top_collisions:
-            closest_y = 10000
-            for crash in top_collisions:
-                if crash < closest_y:
-                    closest_y = crash+1
-
-        elif bottom_collisions:
-            closest_y = 0
-            for crash in bottom_collisions:
-                if crash > closest_y:
-                    closest_y = crash-1
-
-        temp_next_x = 0
-        temp_next_y = 0
-
-        if closest_x != 0:
-            temp_next_x = closest_x
-        if closest_y != 0:
-            temp_next_y = closest_y
-
-        if temp_next_x > 0:
-            if temp_next_y > 0:
-                next_pos = (temp_next_x, temp_next_y)
-            else:
-                next_pos = (temp_next_x, next_pos[1])
-        else:
-            if temp_next_y > 0:
-                next_pos = (next_pos[0], temp_next_y)
-
-            # --------------------------------------
-
-            # if detected_x:
-            #     if detected_y:
-            #         next_pos = (detected_x[0][0][0], detected_y[0][0][1])
-            #     else:
-            #         next_pos = (detected_x[0][0][0], detected_x[0][0][1])
-            # else:
-            #     if detected_y:
-            #         next_pos = (detected_y[0][0][0], detected_y[0][0][1])
-
-            # min_distance = 1000000
-            # if detected:
-            #     for line in detected:
-            #         print("NUMBER ", len(detected))
-            #         line_distance = int(
-            #             math.sqrt((line[1][1]-line[0][1])**2 + (line[1][0]-line[0][0])**2))
-            #         if line_distance < min_distance:
-            #             min_distance = line_distance
-            #             clipped_line = line
-            #     # pygame.draw.line(SCREEN, (255, 30, 9), (clipped_line[0][0], clipped_line[0][1]),
-            #     #                  (clipped_line[1][0], clipped_line[1][1]), 3)
-            #     # print("CLIPPED", clipped_line)
-
-            #     for wall in wall_list:
-            #         ray = (cur_pos[0], cur_pos[1]), (clipped_line[0]
-            #                                          [0], clipped_line[0][1])
-            #         second_clipped_line = wall.rect.clipline(ray)
-            #         if second_clipped_line:
-            #             next_pos = second_clipped_line[0]
-            #         else:
-            #             next_pos = clipped_line[0]
-
-            # pygame.display.flip()
-        for wall in wall_list:
-            # for point in range(dif_range):
-            #     if cur_pos[0] > next_pos[0]:
-            #         if self.rect.collidepoint((cur_pos[0]-point), cur_pos[1]):
-            #             print("Wall at", (cur_pos[0]-point), cur_pos[1])
-            #             print("point = ", point)
-            #             print("-")
-            #             right_col[0] = True
-            #             right_col[1] = wall.rect.right
-            #             return uper_col, bottom_col, right_col, left_col
-            # else:
-            #     if self.rect.collidepoint((cur_pos[0]+point), cur_pos[1]):
-            #         print("Wall at", (cur_pos[0]+point), cur_pos[1])
-            #         print("point = ", point)
-            #         print("-")
-            #         left_col[0] = True
-            #         left_col[1] = wall.rect.left - ROBOT.get_width()
-            #         return uper_col, bottom_col, right_col, left_col
-            # elif abs(cur_pos[1] - next_pos[1]) > 30:
-            #     pygame.draw.line(SCREEN, (255, 255, 0), (cur_pos[0], cur_pos[1]),
-            #                      (next_pos[0], next_pos[1]), 3)
-            #     pygame.display.flip()
-
-            #     dif_range = int(abs(cur_pos[0] - next_pos[0]))
-
-            #     for point in range(dif_range):
-            #         if cur_pos[1] > next_pos[1]:
-            #             if self.rect.collidepoint(next_pos[0], (cur_pos[1]-point)):
-            #                 print("Wall at", next_pos[0], (cur_pos[1]-point))
-            #                 print("point = ", point)
-            #                 print("-")
-            #                 uper_col[0] = True
-            #                 uper_col[1] = (cur_pos[1]-point)
-            #                 return uper_col, bottom_col, right_col, left_col
-            #         else:
-            #             if self.rect.collidepoint(next_pos[0], (cur_pos[1]+point)):
-            #                 print("Wall at", (next_pos[0], (cur_pos[1]+point)))
-            #                 print("point = ", point)
-            #                 print("-")
-            #                 bottom_col[0] = True
-            #                 bottom_col[1] = (cur_pos[1]+point)
-            #                 return uper_col, bottom_col, right_col, left_col
 
             next_rect = pygame.Rect(
                 next_pos[0], next_pos[1], self.img.get_width(), self.img.get_height())
@@ -974,6 +564,18 @@ def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
     # ------------
 
 
+def evaluate_fitness(self, remaining_dust):
+
+    if remaining_dust:
+        dust_score = (1/remaining_dust)**2
+    else:
+        dust_score = 1
+
+    total_score = dust_score - 0.1 * self.wallCollisions
+
+    return total_score
+
+
 def dustEncountered(self, dustImg):
 
     for dust in dustImg:
@@ -981,14 +583,6 @@ def dustEncountered(self, dustImg):
             self.dustCleared += 1
             print("Dust", self.dustCleared)
             dustImg.remove(dust)
-
-
-def find_line(x_start, y_start, x_end, y_end):
-    points = [(x_start, y_start), (x_end, y_end)]
-    x_coords, y_coords = zip(*points)
-    A = vstack([x_coords, ones(len(x_coords))]).T
-    m, c = lstsq(A, y_coords)[0]
-    print("Line Solution is y = {m}x + {c}".format(m=m, c=c))
 
 # setting the enviroment
 
@@ -1019,7 +613,6 @@ class Envir:
 
     def robot_frame(self, pos, rotation, robot):
         n = 80
-        # centerx, centery = pos
         centerx = pos[0]+(robot.get_width()/2)
         centery = pos[1]+(robot.get_height()/2)
         x_axis = (centerx + n*np.cos(rotation), centery + n*np.sin(rotation))
@@ -1029,7 +622,7 @@ class Envir:
         pygame.draw.line(self.map, self.black, (centerx, centery), y_axis, 3)
 
     def dustCheck(self, dustImg):
-        self.dust_remaining = len(dustImg)
+        return len(dustImg)
 
     def draw(self, screen, images, player_robot, MAIN_FONT, HEIGHT):
 
@@ -1143,7 +736,7 @@ class Robot(object):
             [vl, vr] = NN.forward_propagate(inputs)[1]
             activate2 = player_robot.simulation_move(
                 vl, vr, dt, wall_list, SCREEN)
-            #motor = NN.forward_propagate(inputs)
+            motor = NN.forward_propagate(inputs)
             print('motor: ', [vl, vr])
             # activate quit button
             for event in pygame.event.get():
@@ -1160,11 +753,9 @@ class Robot(object):
 
             # run the robot
             activate = player_robot.move(key, dt, wall_list, SCREEN)
-            # player_robot.collide(WIDTH, HEIGHT)
 
             # visualize objects
 
-            # wall_collision(player_robot, SCREEN, WallRect)
             dustEncountered(player_robot, dustImg)
             environment.draw(SCREEN, images, player_robot, MAIN_FONT, HEIGHT)
             for wall in wall_list:
@@ -1172,17 +763,25 @@ class Robot(object):
             for dust in dustImg:
                 dust.draw(SCREEN)
             environment.dustCheck(dustImg)
-            # print("Dust remaining ", environment.dust_remaining)
-            # print("Wall Collisions", player_robot.wallCollisions)
             environment.robot_frame(
                 (player_robot.x, player_robot.y), player_robot.theta, player_robot.img)
             environment.trail((player_robot.x + (ROBOT.get_width()/2),
                                player_robot.y + (ROBOT.get_height()/2)))
             player_robot.upd_rect()
             player_robot.draw(environment.map)
-            cast_rays(SCREEN, walls, player_robot,
-                      ROBOT, STEP_ANGLE, SENSORS_FONT)
 
+            # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
+            sensors = cast_rays(SCREEN, walls, player_robot,
+                                ROBOT, STEP_ANGLE, SENSORS_FONT)
+
+            evaluate_fitness(player_robot, environment.dustCheck(dustImg))
+
+            # print("Dust remaining ", dustCheck(dustImg))
+            # print("Wall Collisions", player_robot.wallCollisions)
+
+            # Example of network run
+            nn = ffnn.network()
+            output, feedback = nn.runNN(sensors)
             # ---
 
             pygame.display.update()
