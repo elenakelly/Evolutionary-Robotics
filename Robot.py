@@ -510,6 +510,7 @@ class PlayRobot(RobotMove):
 def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
 
     all_sensors = []
+    sensor_results = []
 
     sensor_x = player_robot.x+(ROBOT.get_width()/2)
     sensor_y = player_robot.y+(ROBOT.get_height()/2)
@@ -556,10 +557,14 @@ def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
             pygame.draw.line(screen, (255, 130, 100), (sensor_x, sensor_y),
                              (clipped_line[0][0], clipped_line[0][1]), 3)
 
+        sensor_results.append(sensor_distance)
+            
         sensor_text = SENSORS_FONT.render(
             f"{sensor_distance}", 1, (255, 255, 255))
         screen.blit(
             sensor_text, (sensor_placement_x, sensor_placement_y))
+        
+        return sensor_results
 
     # ------------
 
