@@ -778,7 +778,7 @@ class Robot(object):
             sensors = cast_rays(SCREEN, walls, player_robot,
                                 ROBOT, STEP_ANGLE, SENSORS_FONT)
 
-            evaluate_fitness(player_robot, environment.dustCheck(dustImg))
+            score = evaluate_fitness(player_robot, environment.dustCheck(dustImg))
 
             # print("Dust remaining ", dustCheck(dustImg))
             # print("Wall Collisions", player_robot.wallCollisions)
@@ -787,8 +787,10 @@ class Robot(object):
 
             output, feedback = nn.runNN(sensors)
             # ---
-
+            print(output)
             pygame.display.update()
+
+            #print(score)
 
         # exit the game
         pygame.quit()
