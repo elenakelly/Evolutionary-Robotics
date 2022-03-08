@@ -1,7 +1,8 @@
 import numpy as np
 import random
+import ffnn
 
-class RobotNN():
+'''class RobotNN():
     def __init__(self, weights=None):
         if weights is None:
             self.num_inputs = 10
@@ -51,10 +52,10 @@ class RobotNN():
             self.activations[i + 1] = activations
             #print(activations)
         return activations
-
+'''
 class RobotEA():
     def __init__(self, pop_size, select_perc, error_range):
-        self.population = [Individual(RobotNN()) for _ in range(pop_size)]
+        self.population = [Individual(ffnn.network()) for _ in range(pop_size)]
         self.pop_size = pop_size
         self.select_perc = select_perc
         self.error_range = error_range
@@ -85,7 +86,7 @@ class RobotEA():
         for i in range(len(parent_1.dna)):
             # for every layer average
             weights.append(np.mean(np.array([parent_1.dna[i], parent_2.dna[i]]), axis=0))
-        child = Individual(RobotNN(weights=weights))
+        child = Individual(ffnn.network(weights=weights))
         return child
 
     def mutation(self, children):
