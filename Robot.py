@@ -775,17 +775,21 @@ class Robot(object):
             player_robot.draw(environment.map)
 
             # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
-            sensors = cast_rays(SCREEN, walls, player_robot,
-                                ROBOT, STEP_ANGLE, SENSORS_FONT)
+            #sensors = cast_rays(SCREEN, walls, player_robot,
+                                #ROBOT, STEP_ANGLE, SENSORS_FONT)
 
             score = evaluate_fitness(player_robot, environment.dustCheck(dustImg))
+                        
+            # Example of network run
+            sensors = np.array(cast_rays(SCREEN, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT))
+            nn = ffnn.network()
+            output, feedback = nn.runNN(sensors)
+            [vl, vr] = output
+            activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
 
             # print("Dust remaining ", dustCheck(dustImg))
             # print("Wall Collisions", player_robot.wallCollisions)
 
-            # Example of network run
-
-            output, feedback = nn.runNN(sensors)
             # ---
             print(output)
             pygame.display.update()
