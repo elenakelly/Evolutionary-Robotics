@@ -566,11 +566,12 @@ def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
 
 def evaluate_fitness(self, remaining_dust):
     if remaining_dust:
-        dust_score = (1 / remaining_dust) ** 2
+        dust_score = (1 / remaining_dust)
     else:
         dust_score = 1
 
-    total_score = dust_score - 0.1 * self.wallCollisions
+    total_score = dust_score - 0.001 * self.wallCollisions
+    #print(total_score)
 
     return total_score
 
@@ -579,7 +580,7 @@ def dustEncountered(self, dustImg):
     for dust in dustImg:
         if self.rect.colliderect(dust.rect):
             self.dustCleared += 1
-            print("Dust", self.dustCleared)
+            #print("Dust", self.dustCleared)
             dustImg.remove(dust)
 
 
@@ -677,7 +678,7 @@ class Dust:
 class Robot(object):
 
     def __init__(self, weights):
-        self.Main(weights)
+        self.results = self.Main(weights)
 
     def Main(self, NN):
         pygame.init()
@@ -716,20 +717,21 @@ class Robot(object):
                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
-        wall_list2 = [Wall(200, 300, 400, 20, False),Wall(400, 150, 20, 430, False),
-                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
-        
-        wall_list3 = [Wall(100, 40, 20, 300, False), Wall(600, 300, 20, 300, False),
-                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        list =[]
+        x=5
 
-        dustImg = [(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
-            80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))]
+        for i in range (10):
+            x += 80
+            y = 5
+            for j in range(10):
+
+                y+=50
+                list.append((Dust(x, y, DUST, i)))
+        dustImg = list
+        '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
+            80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))
+            , (Dust(400, 400, DUST, 7)), (Dust(350, 300, DUST, 7)), (Dust(400, 410, DUST, 7)), (Dust(370, 390, DUST, 7))
+                   , (Dust(400, 505, DUST, 7)), (Dust(410, 430, DUST, 7)), (Dust(450, 420, DUST, 7))]'''
 
         # enviroment prints
         environment = Envir([600, 800])
@@ -747,7 +749,7 @@ class Robot(object):
 
         nn = ffnn.network(NN.weights)
         # simulation loop
-        for _ in range(500):
+        for _ in range(100):
 
             '''[vl, vr] = NN.forward_propagate(inputs)[1]
             activate2 = player_robot.simulation_move(
@@ -787,14 +789,15 @@ class Robot(object):
             player_robot.draw(environment.map)
 
             # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
-            #sensors = cast_rays(SCREEN, walls, player_robot,
-                                #ROBOT, STEP_ANGLE, SENSORS_FONT)
+            # sensors = cast_rays(SCREEN, walls, player_robot,
+            # ROBOT, STEP_ANGLE, SENSORS_FONT)
 
             score = evaluate_fitness(player_robot, environment.dustCheck(dustImg))
-                        
+
             # Example of network run
-            sensors = np.array(cast_rays(SCREEN, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT))
-            nn = ffnn.network()
+            sensors = cast_rays(SCREEN, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT)
+
+            #nn = ffnn.network()
             output, feedback = nn.runNN(sensors)
             [vl, vr] = output
             activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
@@ -803,10 +806,10 @@ class Robot(object):
             # print("Wall Collisions", player_robot.wallCollisions)
 
             # ---
-            print(output)
+            #print(output)
             pygame.display.update()
 
-            #print(score)
-
+            # print(score)
+        return score
         # exit the game
         pygame.quit()
