@@ -716,6 +716,18 @@ class Robot(object):
                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        
+        wall_list2 = [Wall(200, 300, 400, 20, False),Wall(400, 150, 20, 430, False),
+                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        
+        wall_list3 = [Wall(100, 40, 20, 300, False), Wall(600, 300, 20, 300, False),
+                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
         list =[]
         x=5
