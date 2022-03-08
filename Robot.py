@@ -50,7 +50,6 @@ class RobotMove:
         self.dustCleared = 0
         self.wallCollisions = 0
         self.hasCollided = False
- 
 
     # draw and rotate the image
 
@@ -59,7 +58,7 @@ class RobotMove:
                            math.degrees(-self.theta))
 
     def simulation_move(self, vl, vr, dt, wall_list, screen):
-        
+
         self.vl = vl
         self.vr = vr
         next_x, next_y = self.x, self.y
@@ -104,6 +103,7 @@ class RobotMove:
 
         self.collide2((self.x, self.y), (next_x, next_y), wall_list)
         # self.collide((self.x, self.y), (next_x, next_y),width,height)
+
     def move(self, keys, dt, wall_list, screen):
 
         # setting the buttons
@@ -163,7 +163,8 @@ class RobotMove:
                 next_y = rotation[1]-(self.img.get_height()/2)
                 self.theta = rotation[2]
 
-        self.rotated = pygame.transform.rotozoom(self.img, math.degrees(self.theta), 1)
+        self.rotated = pygame.transform.rotozoom(
+            self.img, math.degrees(self.theta), 1)
         # self.rect = self.rotated.get_rect(center=(self.x, self.y))
 
         self.collide2((self.x, self.y), (next_x, next_y), wall_list)
@@ -180,130 +181,442 @@ class RobotMove:
         left_col = [False, 0]
 
         temp_new = next_pos
+        print(cur_pos[0])
+        if cur_pos[0] > 695:
+            print("cur x", cur_pos[0])
+
+        if cur_pos[1] < 40:
+            print("cur y", cur_pos[0])
 
         detected = []
         detected_x = []
         detected_y = []
 
-        # for wall in wall_list:
+        # if abs(cur_pos[0] - temp_new[0]) > 10 or abs(cur_pos[1] - temp_new[1]) > 10:
 
-        #     if abs(cur_pos[0] - temp_new[0]) > 15 or abs(cur_pos[1] - temp_new[1]) > 15:
-        #         # pygame.draw.line(SCREEN, (255, 255, 0), (cur_pos[0], cur_pos[1]),
-        #         #                  (next_pos[0], next_pos[1]), 3)
-        #         # pygame.display.flip()
+        incremented_x = cur_pos[0]
+        incremented_y = cur_pos[1]
 
-        #         # dif_range = int(abs(cur_pos[0] - next_pos[0]))
+        # if cur_pos[0] != temp_new[0] and cur_pos[1] != temp_new[1]:
+        # MOVING LEFT UP
+        if cur_pos[0] >= temp_new[0] and cur_pos[1] > temp_new[1]:
 
-        #         ray = (cur_pos[0], cur_pos[1]), (temp_new[0], temp_new[1])
-        #         ray_x = (cur_pos[0], cur_pos[1]), (cur_pos[0], temp_new[1])
-        #         ray_y = (cur_pos[0], cur_pos[1]), (temp_new[0], cur_pos[1])
+            searching = [True, True]
+            switch_increment = True  # True increments x
 
-        #         clipped_line = wall.rect.clipline(ray)
-        #         if clipped_line:
-        #             # detected.append(clipped_line)
-        #             pygame.draw.line(SCREEN, (43, 43, 14), (clipped_line[0][0], clipped_line[0][1]),
-        #                              (clipped_line[1][0], clipped_line[1][1]), 3)
-        #             pygame.display.flip()
-        #             detected.append(clipped_line)
-        #             # print("CLIPPED", clipped_line)
+            while searching[0] == True or searching[1] == True:
 
-        #         clipped_line_x = wall.rect.clipline(ray_x)
-        #         if clipped_line_x:
-        #             # detected.append(clipped_line)
-        #             pygame.draw.line(SCREEN, (255, 30, 200), (clipped_line_x[0][0], clipped_line_x[0][1]),
-        #                              (clipped_line_x[1][0], clipped_line_x[1][1]), 3)
-        #             pygame.display.flip()
-        #             detected_x.append(clipped_line_x)
-        #             # print("CLIPPED", clipped_line)
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
 
-        #         clipped_line_y = wall.rect.clipline(ray_y)
-        #         if clipped_line_y:
-        #             # detected.append(clipped_line)
-        #             pygame.draw.line(SCREEN, (0, 30, 200), (clipped_line_y[0][0], clipped_line_y[0][1]),
-        #                              (clipped_line_y[1][0], clipped_line_y[1][1]), 3)
-        #             pygame.display.flip()
-        #             detected_y.append(clipped_line_y)
-        #             # print("CLIPPED", clipped_line)
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
 
-        # if detected:
-        #     next_x = 0
-        #     next_y = 0
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
 
-        #     if cur_pos[0] < next_pos[0]:
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
 
-        #         min_x = 800
-        #         if detected:
-        #             for line in detected:
-        #                 if line[0][0] < min_x:
-        #                     min_x = line[0][0]
-        #         if detected_x:
-        #             for line in detected_x:
-        #                 if line[0][0] < min_x:
-        #                     min_x = line[0][0]
-        #         if detected_y:
-        #             for line in detected_y:
-        #                 if line[0][0] < min_x:
-        #                     min_x = line[0][0]
+                        # if not (uper_col[0] or bottom_col[0] or right_col[0] or left_col[0]):
+                        #     if switch_increment:
+                        #         bottom_col[0] = True
+                        #         bottom_col[1] = wall.rect.bottom
+                        #     else:
+                        #         right_col[0] = True
+                        #         right_col[1] = wall.rect.right
 
-        #         next_x = min_x-ROBOT.get_width()
+                if incremented_x <= temp_new[0] or right_col[0] or left_col[0]:
+                    searching[0] = False
+                if incremented_y <= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
 
-        #     elif cur_pos[0] >= next_pos[0]:
+                if bottom_col[0] and right_col[0]:
+                    return uper_col, bottom_col, right_col, left_col
 
-        #         max_x = 0
-        #         if detected:
-        #             for line in detected:
-        #                 if line[0][0] > max_x:
-        #                     max_x = line[0][0]
-        #         if detected_x:
-        #             for line in detected_x:
-        #                 if line[0][0] < max_x:
-        #                     max_x = line[0][0]
-        #         if detected_y:
-        #             for line in detected_y:
-        #                 if line[0][0] < max_x:
-        #                     max_x = line[0][0]
+                if bottom_col[0] and searching[0] == False:
+                    return uper_col, bottom_col, right_col, left_col
 
-        #         next_x = max_x
+                if right_col[0] and searching[1] == False:
+                    return uper_col, bottom_col, right_col, left_col
 
-        #     if cur_pos[1] < next_pos[1]:
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x - 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y - 1
+                    switch_increment = not switch_increment
 
-        #         min_y = 800
-        #         if detected:
-        #             for line in detected:
-        #                 if line[0][1] < min_y:
-        #                     min_y = line[0][1]
-        #         if detected_x:
-        #             for line in detected_x:
-        #                 if line[0][1] < min_y:
-        #                     min_y = line[0][1]
-        #         if detected_y:
-        #             for line in detected_y:
-        #                 if line[0][1] < min_y:
-        #                     min_y = line[0][1]
+        # MOVING RIGHT BOTTOM
+        elif cur_pos[0] < temp_new[0] and cur_pos[1] <= temp_new[1]:
 
-        #         next_y = min_y - ROBOT.get_height()
+            searching = [True, True]
+            switch_increment = True  # True increments x
 
-        #     elif cur_pos[1] >= next_pos[1]:
+            while searching[0] == True or searching[1] == True:
 
-        #         max_y = 0
-        #         if detected:
-        #             for line in detected:
-        #                 if line[0][1] > max_y:
-        #                     max_y = line[0][1]
-        #         if detected_x:
-        #             for line in detected_x:
-        #                 if line[0][1] < max_y:
-        #                     max_y = line[0][1]
-        #         if detected_y:
-        #             for line in detected_y:
-        #                 if line[0][1] < max_y:
-        #                     max_y = line[0][1]
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
 
-        #         next_y = max_y
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
 
-        #     next_pos = (next_x, next_y)
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
 
-        # --------------------------------------
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                        # if switch_increment:
+                        #     uper_col[0] = True
+                        #     uper_col[1] = wall.rect.top - \
+                        #         ROBOT.get_height()
+                        # else:
+                        #     left_col[0] = True
+                        #     left_col[1] = wall.rect.left - \
+                        #         ROBOT.get_width()
+
+                if incremented_x >= temp_new[0] or right_col[0] or left_col[0]:
+                    searching[0] = False
+                if incremented_y >= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if uper_col[0] and left_col[0]:
+
+                    if bottom_col[1] < 40:
+                        print("cur x", bottom_col[1])
+
+                    if left_col[1]+self.img.get_width() > 695:
+                        print("cur x", left_col[1])
+
+                    return uper_col, bottom_col, right_col, left_col
+
+                if uper_col[0] and searching[0] == False:
+
+                    if bottom_col[1] < 40:
+                        print("cur x", bottom_col[1])
+
+                    if left_col[1]+self.img.get_width() > 695:
+                        print("cur x", left_col[1])
+
+                    return uper_col, bottom_col, right_col, left_col
+                if left_col[0] and searching[1] == False:
+
+                    if bottom_col[1] < 40:
+                        print("cur x", bottom_col[1])
+
+                    if left_col[1]+self.img.get_width() > 695:
+                        print("cur x", left_col[1])
+
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x + 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y + 1
+                    switch_increment = not switch_increment
+
+        # MOVE LEFT BOTTOM
+        elif cur_pos[0] >= temp_new[0] and cur_pos[1] <= temp_new[1]:
+
+            searching = [True, True]
+            switch_increment = True  # True increments x
+
+            while searching[0] == True or searching[1] == True:
+
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
+
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
+
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
+
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                        # if switch_increment:
+                        #     uper_col[0] = True
+                        #     uper_col[1] = wall.rect.top - \
+                        #         ROBOT.get_height()
+                        # else:
+                        #     left_col[0] = True
+                        #     left_col[1] = wall.rect.left - \
+                        #         ROBOT.get_width()
+
+                if incremented_x <= temp_new[0] or left_col[0] or right_col[0]:
+                    searching[0] = False
+                if incremented_y >= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if uper_col[0] and left_col[0]:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if uper_col[0] and searching[0] == False:
+                    return uper_col, bottom_col, right_col, left_col
+                if left_col[0] and searching[1] == False:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x - 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y + 1
+                    switch_increment = not switch_increment
+
+        # MOVE RIGHT UP
+        elif cur_pos[0] < temp_new[0] and cur_pos[1] > temp_new[1]:
+
+            searching = [True, True]
+            switch_increment = True  # True increments x
+
+            while searching[0] == True or searching[1] == True:
+
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
+
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
+
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
+
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                        # if switch_increment:
+                        #     bottom_col[0] = True
+                        #     bottom_col[1] = wall.rect.bottom
+                        # else:
+                        #     left_col[0] = True
+                        #     left_col[1] = wall.rect.left - \
+                        #         ROBOT.get_width()
+
+                if incremented_x >= temp_new[0] or left_col[0] or right_col[0]:
+                    searching[0] = False
+                if incremented_y <= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if bottom_col[0] and left_col[0]:
+
+                    if bottom_col[1] < 40:
+                        print("cur x", bottom_col[1])
+
+                    if left_col[1]+self.img.get_width() > 695:
+                        print("cur x", left_col[1])
+                    return uper_col, bottom_col, right_col, left_col
+
+                if bottom_col[0] and searching[0] == False:
+
+                    if bottom_col[1] < 40:
+                        print("cur x", bottom_col[1])
+
+                    if left_col[1]+self.img.get_width() > 695:
+                        print("cur x", left_col[1])
+
+                    return uper_col, bottom_col, right_col, left_col
+                if left_col[0] and searching[1] == False:
+
+                    if bottom_col[1] < 40:
+                        print("cur x", bottom_col[1])
+
+                    if left_col[1]+self.img.get_width() > 695:
+                        print("cur x", left_col[1])
+
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x + 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y - 1
+                    switch_increment = not switch_increment
+
+                # for wall in wall_list:
+
+                #     if abs(cur_pos[0] - temp_new[0]) > 15 or abs(cur_pos[1] - temp_new[1]) > 15:
+                #         # pygame.draw.line(SCREEN, (255, 255, 0), (cur_pos[0], cur_pos[1]),
+                #         #                  (next_pos[0], next_pos[1]), 3)
+                #         # pygame.display.flip()
+
+                #         # dif_range = int(abs(cur_pos[0] - next_pos[0]))
+
+                #         ray = (cur_pos[0], cur_pos[1]), (temp_new[0], temp_new[1])
+                #         ray_x = (cur_pos[0], cur_pos[1]), (cur_pos[0], temp_new[1])
+                #         ray_y = (cur_pos[0], cur_pos[1]), (temp_new[0], cur_pos[1])
+
+                #         clipped_line = wall.rect.clipline(ray)
+                #         if clipped_line:
+                #             # detected.append(clipped_line)
+                #             pygame.draw.line(SCREEN, (43, 43, 14), (clipped_line[0][0], clipped_line[0][1]),
+                #                              (clipped_line[1][0], clipped_line[1][1]), 3)
+                #             pygame.display.flip()
+                #             detected.append(clipped_line)
+                #             # print("CLIPPED", clipped_line)
+
+                #         clipped_line_x = wall.rect.clipline(ray_x)
+                #         if clipped_line_x:
+                #             # detected.append(clipped_line)
+                #             pygame.draw.line(SCREEN, (255, 30, 200), (clipped_line_x[0][0], clipped_line_x[0][1]),
+                #                              (clipped_line_x[1][0], clipped_line_x[1][1]), 3)
+                #             pygame.display.flip()
+                #             detected_x.append(clipped_line_x)
+                #             # print("CLIPPED", clipped_line)
+
+                #         clipped_line_y = wall.rect.clipline(ray_y)
+                #         if clipped_line_y:
+                #             # detected.append(clipped_line)
+                #             pygame.draw.line(SCREEN, (0, 30, 200), (clipped_line_y[0][0], clipped_line_y[0][1]),
+                #                              (clipped_line_y[1][0], clipped_line_y[1][1]), 3)
+                #             pygame.display.flip()
+                #             detected_y.append(clipped_line_y)
+                #             # print("CLIPPED", clipped_line)
+
+                # if detected:
+                #     next_x = 0
+                #     next_y = 0
+
+                #     if cur_pos[0] < next_pos[0]:
+
+                #         min_x = 800
+                #         if detected:
+                #             for line in detected:
+                #                 if line[0][0] < min_x:
+                #                     min_x = line[0][0]
+                #         if detected_x:
+                #             for line in detected_x:
+                #                 if line[0][0] < min_x:
+                #                     min_x = line[0][0]
+                #         if detected_y:
+                #             for line in detected_y:
+                #                 if line[0][0] < min_x:
+                #                     min_x = line[0][0]
+
+                #         next_x = min_x-ROBOT.get_width()
+
+                #     elif cur_pos[0] >= next_pos[0]:
+
+                #         max_x = 0
+                #         if detected:
+                #             for line in detected:
+                #                 if line[0][0] > max_x:
+                #                     max_x = line[0][0]
+                #         if detected_x:
+                #             for line in detected_x:
+                #                 if line[0][0] < max_x:
+                #                     max_x = line[0][0]
+                #         if detected_y:
+                #             for line in detected_y:
+                #                 if line[0][0] < max_x:
+                #                     max_x = line[0][0]
+
+                #         next_x = max_x
+
+                #     if cur_pos[1] < next_pos[1]:
+
+                #         min_y = 800
+                #         if detected:
+                #             for line in detected:
+                #                 if line[0][1] < min_y:
+                #                     min_y = line[0][1]
+                #         if detected_x:
+                #             for line in detected_x:
+                #                 if line[0][1] < min_y:
+                #                     min_y = line[0][1]
+                #         if detected_y:
+                #             for line in detected_y:
+                #                 if line[0][1] < min_y:
+                #                     min_y = line[0][1]
+
+                #         next_y = min_y - ROBOT.get_height()
+
+                #     elif cur_pos[1] >= next_pos[1]:
+
+                #         max_y = 0
+                #         if detected:
+                #             for line in detected:
+                #                 if line[0][1] > max_y:
+                #                     max_y = line[0][1]
+                #         if detected_x:
+                #             for line in detected_x:
+                #                 if line[0][1] < max_y:
+                #                     max_y = line[0][1]
+                #         if detected_y:
+                #             for line in detected_y:
+                #                 if line[0][1] < max_y:
+                #                     max_y = line[0][1]
+
+                #         next_y = max_y
+
+                #     next_pos = (next_x, next_y)
+
+                # --------------------------------------
 
         right_collisions = []
         left_collisions = []
@@ -827,10 +1140,11 @@ class Robot(object):
         # simulation loop
         for _ in range(500):
 
-            [vl,vr] = NN.forward_propagate(inputs)[1]
-            activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
+            [vl, vr] = NN.forward_propagate(inputs)[1]
+            activate2 = player_robot.simulation_move(
+                vl, vr, dt, wall_list, SCREEN)
             #motor = NN.forward_propagate(inputs)
-            print('motor: ', [vl,vr])
+            print('motor: ', [vl, vr])
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -847,7 +1161,7 @@ class Robot(object):
             # run the robot
             activate = player_robot.move(key, dt, wall_list, SCREEN)
             # player_robot.collide(WIDTH, HEIGHT)
- 
+
             # visualize objects
 
             # wall_collision(player_robot, SCREEN, WallRect)
