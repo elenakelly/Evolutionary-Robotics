@@ -3,6 +3,7 @@ import numpy as np
 import math
 import ffnn
 
+
 # os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
 
@@ -16,8 +17,9 @@ def blit_rotate_center(win, image, top_left, angle):
 
 def blit_text_center(win, font, text):
     render = font.render(text, 1, (200, 200, 200))
-    win.blit(render, (win.get_width()/2 - render.get_width() /
-                      2, win.get_height()/2 - render.get_height()/2))
+    win.blit(render, (win.get_width() / 2 - render.get_width() /
+                      2, win.get_height() / 2 - render.get_height() / 2))
+
 
 # Robot movement
 
@@ -39,7 +41,7 @@ class RobotMove:
         # distance between the centers of the two wheels
         self.l = int(IMG.get_width())
 
-        self.changeX = self.x + (self.l/2)
+        self.changeX = self.x + (self.l / 2)
         self.changeY = self.y
 
         self.rect = pygame.Rect(
@@ -65,20 +67,20 @@ class RobotMove:
         # check model
         if self.vr != 0 or self.vl != 0:
             if self.vl == self.vr:
-                next_x = self.x + ((self.vl+self.vr)/2) * \
-                    np.cos(-self.theta) * dt
-                next_y = self.y - ((self.vl+self.vr)/2) * \
-                    np.sin(-self.theta) * dt
+                next_x = self.x + ((self.vl + self.vr) / 2) * \
+                         np.cos(-self.theta) * dt
+                next_y = self.y - ((self.vl + self.vr) / 2) * \
+                         np.sin(-self.theta) * dt
                 R = np.inf
                 w = 0
             else:
-                R = (self.l/2) * (self.vl + self.vr) / (self.vr - self.vl)
+                R = (self.l / 2) * (self.vl + self.vr) / (self.vr - self.vl)
                 w = (self.vr - self.vl) / self.l
 
-            # Computation of ICC
+                # Computation of ICC
 
-                centerx = self.x+(self.img.get_width()/2)
-                centery = self.y+(self.img.get_height()/2)
+                centerx = self.x + (self.img.get_width() / 2)
+                centery = self.y + (self.img.get_height() / 2)
                 ICC = [centerx - R * np.sin(self.theta),
                        centery + R * np.cos(self.theta)]
 
@@ -92,8 +94,8 @@ class RobotMove:
                                  (ICC[0], ICC[1]), 3)
                 pygame.display.flip()
 
-                next_x = rotation[0]-(self.img.get_width()/2)
-                next_y = rotation[1]-(self.img.get_height()/2)
+                next_x = rotation[0] - (self.img.get_width() / 2)
+                next_y = rotation[1] - (self.img.get_height() / 2)
                 self.theta = rotation[2]
 
         self.rotated = pygame.transform.rotozoom(
@@ -129,20 +131,20 @@ class RobotMove:
         # check model
         if self.vr != 0 or self.vl != 0:
             if self.vl == self.vr:
-                next_x = self.x + ((self.vl+self.vr)/2) * \
-                    np.cos(-self.theta) * dt
-                next_y = self.y - ((self.vl+self.vr)/2) * \
-                    np.sin(-self.theta) * dt
+                next_x = self.x + ((self.vl + self.vr) / 2) * \
+                         np.cos(-self.theta) * dt
+                next_y = self.y - ((self.vl + self.vr) / 2) * \
+                         np.sin(-self.theta) * dt
                 R = np.inf
                 w = 0
             else:
-                R = (self.l/2) * (self.vl + self.vr) / (self.vr - self.vl)
+                R = (self.l / 2) * (self.vl + self.vr) / (self.vr - self.vl)
                 w = (self.vr - self.vl) / self.l
 
-            # Computation of ICC
+                # Computation of ICC
 
-                centerx = self.x+(self.img.get_width()/2)
-                centery = self.y+(self.img.get_height()/2)
+                centerx = self.x + (self.img.get_width() / 2)
+                centery = self.y + (self.img.get_height() / 2)
                 ICC = [centerx - R * np.sin(self.theta),
                        centery + R * np.cos(self.theta)]
 
@@ -156,8 +158,8 @@ class RobotMove:
                                  (ICC[0], ICC[1]), 3)
                 pygame.display.flip()
 
-                next_x = rotation[0]-(self.img.get_width()/2)
-                next_y = rotation[1]-(self.img.get_height()/2)
+                next_x = rotation[0] - (self.img.get_width() / 2)
+                next_y = rotation[1] - (self.img.get_height() / 2)
                 self.theta = rotation[2]
 
         self.rotated = pygame.transform.rotozoom(
@@ -198,7 +200,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                self.img.get_height()
+                                          self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -212,7 +214,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                self.img.get_width()
+                                          self.img.get_width()
 
                 if incremented_x <= temp_new[0] or right_col[0] or left_col[0]:
                     searching[0] = False
@@ -255,7 +257,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                self.img.get_height()
+                                          self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -269,7 +271,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                self.img.get_width()
+                                          self.img.get_width()
 
                 if incremented_x >= temp_new[0] or right_col[0] or left_col[0]:
                     searching[0] = False
@@ -277,14 +279,11 @@ class RobotMove:
                     searching[1] = False
 
                 if uper_col[0] and left_col[0]:
-
                     return uper_col, bottom_col, right_col, left_col
 
                 if uper_col[0] and searching[0] == False:
-
                     return uper_col, bottom_col, right_col, left_col
                 if left_col[0] and searching[1] == False:
-
                     return uper_col, bottom_col, right_col, left_col
 
                 if switch_increment:
@@ -314,7 +313,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                self.img.get_height()
+                                          self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -328,7 +327,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                self.img.get_width()
+                                          self.img.get_width()
 
                 if incremented_x <= temp_new[0] or left_col[0] or right_col[0]:
                     searching[0] = False
@@ -370,7 +369,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                self.img.get_height()
+                                          self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -384,7 +383,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                self.img.get_width()
+                                          self.img.get_width()
 
                 if incremented_x >= temp_new[0] or left_col[0] or right_col[0]:
                     searching[0] = False
@@ -392,14 +391,11 @@ class RobotMove:
                     searching[1] = False
 
                 if bottom_col[0] and left_col[0]:
-
                     return uper_col, bottom_col, right_col, left_col
 
                 if bottom_col[0] and searching[0] == False:
-
                     return uper_col, bottom_col, right_col, left_col
                 if left_col[0] and searching[1] == False:
-
                     return uper_col, bottom_col, right_col, left_col
 
                 if switch_increment:
@@ -508,12 +504,11 @@ class PlayRobot(RobotMove):
 
 
 def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
-
     all_sensors = []
     sensor_results = []
 
-    sensor_x = player_robot.x+(ROBOT.get_width()/2)
-    sensor_y = player_robot.y+(ROBOT.get_height()/2)
+    sensor_x = player_robot.x + (ROBOT.get_width() / 2)
+    sensor_y = player_robot.y + (ROBOT.get_height() / 2)
 
     temp_angle = 0
     for i in range(12):
@@ -549,7 +544,7 @@ def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
         if detected:
             for line in detected:
                 temp_sensor_distance = int(
-                    math.sqrt((line[0][1]-sensor_y)**2 + (line[0][0]-sensor_x)**2))-collision_offset
+                    math.sqrt((line[0][1] - sensor_y) ** 2 + (line[0][0] - sensor_x) ** 2)) - collision_offset
                 if temp_sensor_distance < sensor_distance:
                     sensor_distance = temp_sensor_distance
                     clipped_line = line
@@ -558,21 +553,20 @@ def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
                              (clipped_line[0][0], clipped_line[0][1]), 3)
 
         sensor_results.append(sensor_distance)
-            
+
         sensor_text = SENSORS_FONT.render(
             f"{sensor_distance}", 1, (255, 255, 255))
         screen.blit(
             sensor_text, (sensor_placement_x, sensor_placement_y))
-        
-        return sensor_results
+
+    return sensor_results
 
     # ------------
 
 
 def evaluate_fitness(self, remaining_dust):
-
     if remaining_dust:
-        dust_score = (1/remaining_dust)**2
+        dust_score = (1 / remaining_dust) ** 2
     else:
         dust_score = 1
 
@@ -582,12 +576,12 @@ def evaluate_fitness(self, remaining_dust):
 
 
 def dustEncountered(self, dustImg):
-
     for dust in dustImg:
         if self.rect.colliderect(dust.rect):
             self.dustCleared += 1
             print("Dust", self.dustCleared)
             dustImg.remove(dust)
+
 
 # setting the enviroment
 
@@ -605,24 +599,26 @@ class Envir:
         # trail
         self.trail_set = []
         self.dust_remaining = 0
+
     # line route
 
     def trail(self, pos):
-        for i in range(0, len(self.trail_set)-1):
+        for i in range(0, len(self.trail_set) - 1):
             pygame.draw.line(self.map, self.white, (self.trail_set[i][0], self.trail_set[i][1]),
-                             (self.trail_set[i+1][0], self.trail_set[i+1][1]))
+                             (self.trail_set[i + 1][0], self.trail_set[i + 1][1]))
         if self.trail_set.__sizeof__() > 10000:
             self.trail_set.pop(0)
         self.trail_set.append(pos)
+
     # y and x axis
 
     def robot_frame(self, pos, rotation, robot):
         n = 80
-        centerx = pos[0]+(robot.get_width()/2)
-        centery = pos[1]+(robot.get_height()/2)
-        x_axis = (centerx + n*np.cos(rotation), centery + n*np.sin(rotation))
-        y_axis = (centerx + n*np.cos(rotation+np.pi/2),
-                  centery + n*np.sin(rotation+np.pi/2))
+        centerx = pos[0] + (robot.get_width() / 2)
+        centery = pos[1] + (robot.get_height() / 2)
+        x_axis = (centerx + n * np.cos(rotation), centery + n * np.sin(rotation))
+        y_axis = (centerx + n * np.cos(rotation + np.pi / 2),
+                  centery + n * np.sin(rotation + np.pi / 2))
         pygame.draw.line(self.map, self.black, (centerx, centery), x_axis, 3)
         pygame.draw.line(self.map, self.black, (centerx, centery), y_axis, 3)
 
@@ -637,7 +633,8 @@ class Envir:
 
         # display left, right velocity and theta on screen
         vel_text = MAIN_FONT.render(
-            f"Vl = {round(player_robot.vl,2)} Vr = {round(player_robot.vr,2)} theta = {int(np.degrees(player_robot.theta))}", 1, self.white)
+            f"Vl = {round(player_robot.vl, 2)} Vr = {round(player_robot.vr, 2)} theta = {int(np.degrees(player_robot.theta))}",
+            1, self.white)
         screen.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 40))
 
         # display robot on screen
@@ -647,10 +644,10 @@ class Envir:
     def setWalls(HEIGHT, WIDTH):
         wall_pixel_offset = 42
         rectWallL = pygame.Rect(0, 0, wall_pixel_offset, HEIGHT)
-        rectWallR = pygame.Rect(WIDTH-wall_pixel_offset, 0,
+        rectWallR = pygame.Rect(WIDTH - wall_pixel_offset, 0,
                                 wall_pixel_offset, HEIGHT)
-        rectWallT = pygame.Rect(0,  0, WIDTH, wall_pixel_offset)
-        rectWallB = pygame.Rect(0, HEIGHT-wall_pixel_offset,
+        rectWallT = pygame.Rect(0, 0, WIDTH, wall_pixel_offset)
+        rectWallB = pygame.Rect(0, HEIGHT - wall_pixel_offset,
                                 WIDTH, wall_pixel_offset)
         return [rectWallL, rectWallR, rectWallT, rectWallB]
 
@@ -713,10 +710,11 @@ class Robot(object):
         # walls
 
         wall_pixel_offset = 42
-        wall_list = [Wall(110, 200, 291, 20, False), Wall(400, 39, 20, 300, False), Wall(0, 0, wall_pixel_offset-1, HEIGHT, True),
-                     Wall(WIDTH-wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                          True), Wall(0,  0, WIDTH, wall_pixel_offset-1, True),
-                     Wall(0, HEIGHT-wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        wall_list = [Wall(110, 200, 291, 20, False), Wall(400, 39, 20, 300, False),
+                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
         dustImg = [(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
             80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))]
@@ -735,14 +733,15 @@ class Robot(object):
         clock = pygame.time.Clock()
         FPS = 60
 
+        nn = ffnn.network(NN.weights)
         # simulation loop
         for _ in range(500):
 
-            [vl, vr] = NN.forward_propagate(inputs)[1]
+            '''[vl, vr] = NN.forward_propagate(inputs)[1]
             activate2 = player_robot.simulation_move(
                 vl, vr, dt, wall_list, SCREEN)
             motor = NN.forward_propagate(inputs)
-            print('motor: ', [vl, vr])
+            print('motor: ', [vl, vr])'''
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -770,8 +769,8 @@ class Robot(object):
             environment.dustCheck(dustImg)
             environment.robot_frame(
                 (player_robot.x, player_robot.y), player_robot.theta, player_robot.img)
-            environment.trail((player_robot.x + (ROBOT.get_width()/2),
-                               player_robot.y + (ROBOT.get_height()/2)))
+            environment.trail((player_robot.x + (ROBOT.get_width() / 2),
+                               player_robot.y + (ROBOT.get_height() / 2)))
             player_robot.upd_rect()
             player_robot.draw(environment.map)
 
@@ -785,7 +784,7 @@ class Robot(object):
             # print("Wall Collisions", player_robot.wallCollisions)
 
             # Example of network run
-            nn = ffnn.network()
+
             output, feedback = nn.runNN(sensors)
             # ---
 
