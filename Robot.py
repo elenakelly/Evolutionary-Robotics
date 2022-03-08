@@ -716,6 +716,18 @@ class Robot(object):
                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
+        wall_list2 = [Wall(200, 300, 400, 20, False),Wall(400, 150, 20, 430, False),
+                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        
+        wall_list3 = [Wall(100, 40, 20, 300, False), Wall(600, 300, 20, 300, False),
+                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+
         dustImg = [(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
             80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))]
 
