@@ -95,15 +95,19 @@ class RobotEA():
                 # TODO change how noise is added(what we do now is we create a random matrix and then we add it to the first one)
                 weights = []
                 for j in range(len(children[i].dna)):
-                    weights.append(children[i].dna[j] + (0.001 * np.random.rand(*children[i].dna[j].shape)))
+                    weights.append(children[i].dna[j] + (0.01 * np.random.rand(*children[i].dna[j].shape)))
                 children[i].dna = weights
         return children
 
     def run(self):
         #life cycle
         selected = self.selection()
+        #print("selected", selected)
         children = self.crossover(selected)
         children = self.mutation(children)
+
+        #keep best the same
+        #children[-1] = selected[0]
         self.population = children
 
         return self.population
@@ -121,7 +125,7 @@ class Individual():
         return self.__str__()
 
     def __str__(self):
-        return 'Robot score: ' + self.score
+        return 'Robot score: ' + str(self.score)
 
 
 #Testing area
