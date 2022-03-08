@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
-from robotNN import RobotNN, RobotEA
+from robotNN import RobotEA
+import ffnn
 import pygame
 import Robot
 
