@@ -1,34 +1,38 @@
 from matplotlib import pyplot as plt
 from robotNN import RobotEA
-import ffnn
-import pygame
 import Robot
 import matplotlib.pyplot as plt
+
 class RunRobot():
-    def __init__(self, pop_size, select_perc, error_range):
+    def __init__(self, pop_size, select_perc, error_range, mutate):
         self.pop_size = pop_size
         self.select_perc = select_perc
         self.error_range = error_range
+        self.mutate = mutate
+        self.robotEA = RobotEA(self.pop_size, self.select_perc, self.error_range, self.mutate)
     def train(self, epochs):
-        robotEA = RobotEA(self.pop_size, self.select_perc, self.error_range)
         average_scores = []
         best_scores = []
         for epoch in range(epochs):
             accumulated_score = 0
-
-            for individual in robotEA.population:
+            #print("=============start of epoch=====================")
+            for i in range(len(self.robotEA.population)):
                 #create and simulate robot given the neural network
-                individual.score = Robot.Robot(individual.NN).results
-                #print("score: ", individual.score)
-                accumulated_score +=individual.score
-                print(individual.score)
-            average_scores.append(accumulated_score/len(robotEA.population))
+                self.robotEA.population[i].update_score(Robot.Robot(self.robotEA.population[i].NN).results)
+                #print("this is the score returned from the simulation", self.robotEA.population[i].score)
+                accumulated_score +=self.robotEA.population[i].score
 
-            print("Iteration ", epoch, " score: ", accumulated_score/len(robotEA.population))
-            #call Evolutionary Algorithms to update the weights and proceed to the next iteration
-            robotEA.run()
-            best_scores.append(robotEA.population[0].score)
-        print(average_scores)
-        plt.plot(average_scores, label="Average Scores")
-        plt.plot(best_scores, label="Best Scores")
+            average_scores.append(accumulated_score/len(self.robotEA.population))
+
+            lis = [rob.score for rob in self.robotEA.population]
+            lis.sort()
+            #print("Iteration ", epoch, " best score: ", [rob.score for rob in self.robotEA.population])
+            #print("Iteration ", epoch, " best score: ", max(lis))
+            best_scores.append(max(lis))
+
+            # call Evolutionary Algorithms to update the weights and proceed to the next iteration
+            self.robotEA.run()
+            #print("=============end of epoch=====================")
+        plt.plot(average_scores, label="Average Scores", c='blue')
+        plt.plot(best_scores, label="Best Scores", c='red')
         plt.show()
