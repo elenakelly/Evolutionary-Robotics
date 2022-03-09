@@ -1,11 +1,12 @@
 from runRobot import RunRobot
 
-iterations = 10
+iterations = 50
 
-pop_size = 5
-select_perc = 0.9
+pop_size = 10
+select_perc = 0.5
 error_range = 0.1
+mutate = 0.1
 
-runRobot = RunRobot(pop_size, select_perc, error_range)
+runRobot = RunRobot(pop_size, select_perc, error_range, mutate)
 
 runRobot.train(iterations)
