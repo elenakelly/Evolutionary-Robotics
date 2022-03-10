@@ -99,11 +99,11 @@ class RobotEA():
                 #print("before mutation: ", children[i].dna)
                 for j in range(len(children[i].dna)):
                     bias = np.random.uniform(-1,1, [children[i].dna[j].shape[0], children[i].dna[j].shape[1]])
-                    bias = np.where(abs(bias) > 0.2, 0, bias * 0.1)
+                    bias = np.where(abs(bias) > 0.05, 0, bias)
                     weights.append(children[i].dna[j] + bias)
                     #print("bias term", bias)
                 children[i].dna = weights
-                #print("after mutation: ", children[i].dna)
+                print("after mutation: ", children[i].dna)
         return children
 
     def run(self):
@@ -116,6 +116,8 @@ class RobotEA():
         children = self.mutation(children)
         #print("dna of first after mutation: ", children[0].dna)
 
+        # keep the best the same
+        children[0:2] = selected[0:2]
         self.population = children
 
         return self.population
