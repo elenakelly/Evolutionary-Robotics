@@ -761,8 +761,10 @@ class Robot(object):
         nn = robotNN.network(NN.weights)
         deltat = 0
 
-        # simulation loop
-        for _ in range(25):
+         # simulation loop for 10 sec
+        while time.time() - start_time < 10:
+            
+            
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
