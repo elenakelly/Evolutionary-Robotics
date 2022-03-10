@@ -2,6 +2,7 @@ import pygame
 import numpy as np
 import math
 import robotNN
+import time
 
 # os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -659,7 +660,7 @@ class Wall():
 
     def draw(self, screen):
         if not self.istransparent:
-            pygame.draw.rect(screen, (0, 51, 0), self.rect)
+            pygame.draw.rect(screen, (51, 51, 38), self.rect)
 
 
 class Dust:
@@ -727,12 +728,20 @@ class Robot(object):
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                       Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
-        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+        wall_list4 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
                      Wall(500, 20, 20, 347, False),Wall(700, 25, 20, 490, False),
                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        
+        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+                Wall(500, 150, 20, 220, False),Wall(700, 150, 20, 370, False),
+                Wall(0, 150, 500, 20, False), Wall(0, 60, 800, 20, False),Wall(700, 150, 800, 20, False),
+                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]             
 
         list = []
         x = 5
@@ -743,7 +752,18 @@ class Robot(object):
             for j in range(30):
                 y += 30
                 list.append((Dust(x, y, DUST, i)))
-        dustImg = list
+        
+        list1 = [(Dust(600, 340, DUST, 1)), Dust(600, 440, DUST, 2), (Dust(600, 140, DUST, 3)),
+        (Dust(650, 300, DUST, 1)), Dust(650, 400, DUST, 2), (Dust(650, 100, DUST, 3)), 
+        (Dust(650, 200, DUST, 3)),(Dust(600, 240, DUST, 3)),(Dust(600, 220, DUST, 3)),(Dust(600, 320, DUST, 3))
+        ,(Dust(600, 120, DUST, 3)),(Dust(600, 420, DUST, 3)),(Dust(550, 260, DUST, 3)),(Dust(550, 360, DUST, 3))
+        ,(Dust(550, 160, DUST, 3)),(Dust(550, 460, DUST, 3)),(Dust(450, 460, DUST, 3)),(Dust(350, 460, DUST, 3))
+        ,(Dust(250, 460, DUST, 3)),(Dust(150, 460, DUST, 3)),(Dust(550, 390, DUST, 3)),(Dust(450, 390, DUST, 3))
+        ,(Dust(350, 390, DUST, 3)),(Dust(250, 390, DUST, 3)),(Dust(150, 390, DUST, 3)),(Dust(100, 90, DUST, 3))
+        ,(Dust(550, 90, DUST, 3)),(Dust(450, 90, DUST, 3)),(Dust(350, 90, DUST, 3)),(Dust(250, 90, DUST, 3)),
+        (Dust(150, 90, DUST, 3)),(Dust(50, 90, DUST, 3)),(Dust(650, 90, DUST, 3)),(Dust(750, 90, DUST, 3))]
+
+        dustImg = list1
         '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
             80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))
             , (Dust(400, 400, DUST, 7)), (Dust(350, 300, DUST, 7)), (Dust(400, 410, DUST, 7)), (Dust(370, 390, DUST, 7))
@@ -765,10 +785,11 @@ class Robot(object):
 
         nn = robotNN.network(NN.weights)
         deltat = 0
+        start_time = time.time()
 
 
         # simulation loop
-        for _ in range(1000):
+        while time.time() - start_time < 15:
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -850,8 +871,13 @@ class Robot(object):
 
             # ---
             # print(output)
-            pygame.display.update()
 
+            
+            timer_text = MAIN_FONT.render(
+            f"Timer = {round(time.time() - start_time, 2)}",
+            1, (255,255,255))
+            SCREEN.blit(timer_text, (10, HEIGHT - timer_text.get_height() - 10))
+            pygame.display.update()
             # print(score)
         return score
         # exit the game

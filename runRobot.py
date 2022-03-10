@@ -35,4 +35,7 @@ class RunRobot():
             print("=============end of epoch=====================")
         plt.plot(average_scores, label="Average Scores", c='blue')
         plt.plot(best_scores, label="Best Scores", c='red')
+        plt.ylabel("Evaluation")
+        plt.xlabel("Iteration")
+        plt.legend()
         plt.show()

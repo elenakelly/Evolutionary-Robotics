@@ -1,6 +1,6 @@
 from runRobot import RunRobot
 
-iterations = 100
+iterations = 1000
 
 pop_size = 15
 select_perc = 0.5
