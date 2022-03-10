@@ -2,6 +2,7 @@ import pygame
 import numpy as np
 import math
 import robotNN
+import time
 
 # os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -755,6 +756,7 @@ class Robot(object):
         dt = 50
         clock = pygame.time.Clock()
         FPS = 60
+        start_time = time.time()
 
         nn = robotNN.network(NN.weights)
         deltat = 0
@@ -818,6 +820,13 @@ class Robot(object):
             pygame.display.update()
 
             # print(score)
+            
+            
+            #Visual Timer
+            timer_text = MAIN_FONT.render(
+            f"Timer = {round(time.time() - start_time, 2)}",
+            1, (255,255,255))
+            SCREEN.blit(timer_text, (10, HEIGHT - timer_text.get_height() - 560))
         return score
         # exit the game
         pygame.quit()
