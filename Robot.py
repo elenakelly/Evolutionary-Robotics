@@ -2,7 +2,6 @@ import pygame
 import numpy as np
 import math
 import robotNN
-import time
 
 # os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
 # os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -496,7 +495,7 @@ class RobotMove:
 class PlayRobot(RobotMove):
     # START_POS = (random.uniform(40, 735), random.uniform(
     #     40, 535))  # start at random potition
-    START_POS = (550, 300)
+    START_POS = (80, 400)
     trail_set = []
 
 
@@ -570,7 +569,7 @@ def evaluate_fitness(self, remaining_dust):
     else:
         dust_score = 10
 
-    total_score = dust_score - 0.01 * self.wallCollisions
+    total_score = dust_score - self.wallCollisions * 0.0001
     #print("Wall Collisions: ", self.wallCollisions)
 
     return total_score
@@ -677,10 +676,10 @@ class Dust:
 
 class Robot(object):
 
-    def __init__(self, weights):
-        self.results = self.Main(weights)
+    def __init__(self, weights, epoch, robot_i):
+        self.results = self.Main(weights, epoch, robot_i)
 
-    def Main(self, NN):
+    def Main(self, NN, epoch, robot_i):
         pygame.init()
 
 
@@ -710,7 +709,7 @@ class Robot(object):
         # walls
 
         wall_pixel_offset = 42
-        wall_list = [Wall(110, 200, 291, 20, False), Wall(400, 39, 20, 300, False),
+        wall_list1 = [Wall(110, 200, 291, 20, False), Wall(400, 39, 20, 300, False),
                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
@@ -728,14 +727,21 @@ class Robot(object):
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                       Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
+        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+                     Wall(500, 20, 20, 347, False),Wall(700, 25, 20, 490, False),
+                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+
         list = []
         x = 5
 
-        for i in range(10):
-            x += 80
+        for i in range(30):
+            x += 40
             y = 5
-            for j in range(10):
-                y += 50
+            for j in range(30):
+                y += 30
                 list.append((Dust(x, y, DUST, i)))
         dustImg = list
         '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
@@ -756,15 +762,13 @@ class Robot(object):
         dt = 50
         clock = pygame.time.Clock()
         FPS = 60
-        start_time = time.time()
 
         nn = robotNN.network(NN.weights)
         deltat = 0
 
-         # simulation loop for 10 sec
-        while time.time() - start_time < 10:
-            
-            
+
+        # simulation loop
+        for _ in range(1000):
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -797,6 +801,10 @@ class Robot(object):
             player_robot.upd_rect()
             player_robot.draw(environment.map)
 
+            string = "Epochs: " + str(epoch) + "   Robot ID: " + str(robot_i)
+            vel_text = MAIN_FONT.render(string, 4, (255, 255, 255))
+            SCREEN.blit(vel_text, (50, 10))
+
             # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
             # sensors = cast_rays(SCREEN, walls, player_robot,
             # ROBOT, STEP_ANGLE, SENSORS_FONT)
@@ -806,14 +814,37 @@ class Robot(object):
             # Example of network run
             sensors = cast_rays(SCREEN, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT)
 
-            if deltat > 2:
+            '''if deltat > 2:
                 output, feedback = nn.runNN(sensors)
                 [vl, vr] = output
                 deltat = 0
                 activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
+            deltat += 1'''
+
+            #if deltat > 2:
+            keys = [0, 0, 0, 0, 0, 0, 0]
+            output, feedback = nn.runNN(sensors)
+            [mota, motb] = output
+            deltat = 0
+            if mota > 0 and mota < 0.5:
+                    keys[0] = 1
+            elif mota <= 0 and mota > -0.5:
+                    keys[1] = 1
+
+            if motb > 0 and motb < 0.5:
+                    keys[2] = 1
+            elif motb <= 0 and motb > - 0.5:
+                    keys[3] = 1
+
+                # activate2 = player_robot.simulation_move(
+                #     vl, vr, dt, wall_list, SCREEN)
+            activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
             deltat += 1
 
 
+            if player_robot.wallCollisions > 0:
+                print('Closed because of collision')
+                return score
             # print("Dust remaining ", dustCheck(dustImg))
             # print("Wall Collisions", player_robot.wallCollisions)
 
@@ -822,13 +853,6 @@ class Robot(object):
             pygame.display.update()
 
             # print(score)
-            
-            
-            #Visual Timer
-            timer_text = MAIN_FONT.render(
-            f"Timer = {round(time.time() - start_time, 2)}",
-            1, (255,255,255))
-            SCREEN.blit(timer_text, (10, HEIGHT - timer_text.get_height() - 560))
         return score
         # exit the game
         pygame.quit()
