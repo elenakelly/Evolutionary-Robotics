@@ -53,7 +53,7 @@ class network():
         self.feedback = hidden_layer_output
 
 
-        self.output_layer2.forward(self.hidden_layer1.output)
+        self.output_layer2.forward(self.act_sigmoid1.output)
 
         self.act_tanh.forward(self.output_layer2.output)
         motor_output = self.act_tanh.output
