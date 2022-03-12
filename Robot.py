@@ -773,7 +773,7 @@ class Robot(object):
                      250, 460, DUST, 3)), (Dust(150, 460, DUST, 3)), (Dust(550, 390, DUST, 3)), (Dust(450, 390, DUST, 3)), (Dust(350, 390, DUST, 3)), (Dust(250, 390, DUST, 3)), (Dust(150, 390, DUST, 3)), (Dust(100, 90, DUST, 3)), (Dust(550, 90, DUST, 3)), (Dust(450, 90, DUST, 3)), (Dust(350, 90, DUST, 3)), (Dust(250, 90, DUST, 3)),
                  (Dust(150, 90, DUST, 3)), (Dust(50, 90, DUST, 3)), (Dust(650, 90, DUST, 3)), (Dust(750, 90, DUST, 3))]
 
-        dustImg = list
+        dustImg = list1
         '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
             80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))
             , (Dust(400, 400, DUST, 7)), (Dust(350, 300, DUST, 7)), (Dust(400, 410, DUST, 7)), (Dust(370, 390, DUST, 7))
@@ -798,7 +798,7 @@ class Robot(object):
         start_time = time.time()
 
         # simulation loop
-        while time.time() - start_time < 60:
+        while time.time() - start_time < 15:
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -831,7 +831,7 @@ class Robot(object):
             player_robot.upd_rect()
             player_robot.draw(environment.map)
 
-            string = "Epochs: " + str(epoch) + "   Robot ID: " + str(robot_i)
+            string = "Epochs: " + str(epoch+1) + "   Robot ID: " + str(robot_i+1)
             vel_text = MAIN_FONT.render(string, 4, (255, 255, 255))
             SCREEN.blit(vel_text, (50, 10))
 
@@ -902,7 +902,7 @@ class Robot(object):
 
             # activate2 = player_robot.simulation_move(
             #     vl, vr, dt, wall_list, SCREEN)
-            activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
+            #activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
             deltat += 1
 
             if player_robot.vl == -player_robot.vr or player_robot.vr == -player_robot.vl:
