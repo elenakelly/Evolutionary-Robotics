@@ -68,9 +68,9 @@ class RobotMove:
         if self.vr != 0 or self.vl != 0:
             if self.vl == self.vr:
                 next_x = self.x + ((self.vl + self.vr) / 2) * \
-                         np.cos(-self.theta) * dt
+                    np.cos(-self.theta) * dt
                 next_y = self.y - ((self.vl + self.vr) / 2) * \
-                         np.sin(-self.theta) * dt
+                    np.sin(-self.theta) * dt
                 R = np.inf
                 w = 0
             else:
@@ -132,9 +132,9 @@ class RobotMove:
         if self.vr != 0 or self.vl != 0:
             if self.vl == self.vr:
                 next_x = self.x + ((self.vl + self.vr) / 2) * \
-                         np.cos(-self.theta) * dt
+                    np.cos(-self.theta) * dt
                 next_y = self.y - ((self.vl + self.vr) / 2) * \
-                         np.sin(-self.theta) * dt
+                    np.sin(-self.theta) * dt
                 R = np.inf
                 w = 0
             else:
@@ -200,7 +200,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                          self.img.get_height()
+                                self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -214,7 +214,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                          self.img.get_width()
+                                self.img.get_width()
 
                 if incremented_x <= temp_new[0] or right_col[0] or left_col[0]:
                     searching[0] = False
@@ -257,7 +257,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                          self.img.get_height()
+                                self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -271,7 +271,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                          self.img.get_width()
+                                self.img.get_width()
 
                 if incremented_x >= temp_new[0] or right_col[0] or left_col[0]:
                     searching[0] = False
@@ -313,7 +313,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                          self.img.get_height()
+                                self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -327,7 +327,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                          self.img.get_width()
+                                self.img.get_width()
 
                 if incremented_x <= temp_new[0] or left_col[0] or right_col[0]:
                     searching[0] = False
@@ -369,7 +369,7 @@ class RobotMove:
                             # print("upper col")
                             uper_col[0] = True
                             uper_col[1] = wall.rect.top - \
-                                          self.img.get_height()
+                                self.img.get_height()
                         elif abs(wall.rect.bottom - next_rect.top) <= 10:
                             # print("bottom col")
                             bottom_col[0] = True
@@ -383,7 +383,7 @@ class RobotMove:
                             # print("left col")
                             left_col[0] = True
                             left_col[1] = wall.rect.left - \
-                                          self.img.get_width()
+                                self.img.get_width()
 
                 if incremented_x >= temp_new[0] or left_col[0] or right_col[0]:
                     searching[0] = False
@@ -617,7 +617,8 @@ class Envir:
         n = 80
         centerx = pos[0] + (robot.get_width() / 2)
         centery = pos[1] + (robot.get_height() / 2)
-        x_axis = (centerx + n * np.cos(rotation), centery + n * np.sin(rotation))
+        x_axis = (centerx + n * np.cos(rotation),
+                  centery + n * np.sin(rotation))
         y_axis = (centerx + n * np.cos(rotation + np.pi / 2),
                   centery + n * np.sin(rotation + np.pi / 2))
         pygame.draw.line(self.map, self.black, (centerx, centery), x_axis, 3)
@@ -683,7 +684,6 @@ class Robot(object):
     def Main(self, NN, epoch, robot_i):
         pygame.init()
 
-
         # images
         BACKGROUND = pygame.image.load("images/background.png")
         ROBOT = pygame.image.load("images/vacuum.png")
@@ -711,10 +711,10 @@ class Robot(object):
 
         wall_pixel_offset = 42
         wall_list1 = [Wall(110, 200, 291, 20, False), Wall(400, 39, 20, 300, False),
-                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
         wall_list2 = [Wall(200, 300, 400, 20, False), Wall(400, 150, 20, 430, False),
                       Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
@@ -729,19 +729,22 @@ class Robot(object):
                       Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
         wall_list4 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
-                     Wall(500, 20, 20, 347, False),Wall(700, 25, 20, 490, False),
+                      Wall(500, 20, 20, 347, False), Wall(
+                          700, 25, 20, 490, False),
+                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+
+        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+                     Wall(500, 150, 20, 220, False), Wall(
+                         700, 150, 20, 370, False),
+                     Wall(0, 150, 500, 20, False), Wall(0, 60, 800,
+                                                        20, False), Wall(700, 150, 800, 20, False),
                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                     True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
-        
-        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
-                Wall(500, 150, 20, 220, False),Wall(700, 150, 20, 370, False),
-                Wall(0, 150, 500, 20, False), Wall(0, 60, 800, 20, False),Wall(700, 150, 800, 20, False),
-                Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-                Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                    True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]             
 
         list = []
         x = 5
@@ -752,16 +755,13 @@ class Robot(object):
             for j in range(30):
                 y += 30
                 list.append((Dust(x, y, DUST, i)))
-        
+
         list1 = [(Dust(600, 340, DUST, 1)), Dust(600, 440, DUST, 2), (Dust(600, 140, DUST, 3)),
-        (Dust(650, 300, DUST, 1)), Dust(650, 400, DUST, 2), (Dust(650, 100, DUST, 3)), 
-        (Dust(650, 200, DUST, 3)),(Dust(600, 240, DUST, 3)),(Dust(600, 220, DUST, 3)),(Dust(600, 320, DUST, 3))
-        ,(Dust(600, 120, DUST, 3)),(Dust(600, 420, DUST, 3)),(Dust(550, 260, DUST, 3)),(Dust(550, 360, DUST, 3))
-        ,(Dust(550, 160, DUST, 3)),(Dust(550, 460, DUST, 3)),(Dust(450, 460, DUST, 3)),(Dust(350, 460, DUST, 3))
-        ,(Dust(250, 460, DUST, 3)),(Dust(150, 460, DUST, 3)),(Dust(550, 390, DUST, 3)),(Dust(450, 390, DUST, 3))
-        ,(Dust(350, 390, DUST, 3)),(Dust(250, 390, DUST, 3)),(Dust(150, 390, DUST, 3)),(Dust(100, 90, DUST, 3))
-        ,(Dust(550, 90, DUST, 3)),(Dust(450, 90, DUST, 3)),(Dust(350, 90, DUST, 3)),(Dust(250, 90, DUST, 3)),
-        (Dust(150, 90, DUST, 3)),(Dust(50, 90, DUST, 3)),(Dust(650, 90, DUST, 3)),(Dust(750, 90, DUST, 3))]
+                 (Dust(650, 300, DUST, 1)), Dust(
+                     650, 400, DUST, 2), (Dust(650, 100, DUST, 3)),
+                 (Dust(650, 200, DUST, 3)), (Dust(600, 240, DUST, 3)), (Dust(600, 220, DUST, 3)), (Dust(600, 320, DUST, 3)), (Dust(600, 120, DUST, 3)), (Dust(600, 420, DUST, 3)), (Dust(550, 260, DUST, 3)), (Dust(550, 360, DUST, 3)), (Dust(550, 160, DUST, 3)), (Dust(550, 460, DUST, 3)), (Dust(450, 460, DUST, 3)), (Dust(350, 460, DUST, 3)), (Dust(
+                     250, 460, DUST, 3)), (Dust(150, 460, DUST, 3)), (Dust(550, 390, DUST, 3)), (Dust(450, 390, DUST, 3)), (Dust(350, 390, DUST, 3)), (Dust(250, 390, DUST, 3)), (Dust(150, 390, DUST, 3)), (Dust(100, 90, DUST, 3)), (Dust(550, 90, DUST, 3)), (Dust(450, 90, DUST, 3)), (Dust(350, 90, DUST, 3)), (Dust(250, 90, DUST, 3)),
+                 (Dust(150, 90, DUST, 3)), (Dust(50, 90, DUST, 3)), (Dust(650, 90, DUST, 3)), (Dust(750, 90, DUST, 3))]
 
         dustImg = list1
         '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
@@ -786,7 +786,6 @@ class Robot(object):
         nn = robotNN.network(NN.weights)
         deltat = 0
         start_time = time.time()
-
 
         # simulation loop
         while time.time() - start_time < 15:
@@ -830,10 +829,12 @@ class Robot(object):
             # sensors = cast_rays(SCREEN, walls, player_robot,
             # ROBOT, STEP_ANGLE, SENSORS_FONT)
 
-            score = evaluate_fitness(player_robot, environment.dustCheck(dustImg))
+            score = evaluate_fitness(
+                player_robot, environment.dustCheck(dustImg))
 
             # Example of network run
-            sensors = cast_rays(SCREEN, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT)
+            sensors = cast_rays(SCREEN, walls, player_robot,
+                                ROBOT, STEP_ANGLE, SENSORS_FONT)
 
             '''if deltat > 2:
                 output, feedback = nn.runNN(sensors)
@@ -842,26 +843,37 @@ class Robot(object):
                 activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
             deltat += 1'''
 
-            #if deltat > 2:
+            # if deltat > 2:
             keys = [0, 0, 0, 0, 0, 0, 0]
             output, feedback = nn.runNN(sensors)
             [mota, motb] = output
             deltat = 0
-            if mota > 0 and mota < 0.5:
-                    keys[0] = 1
-            elif mota <= 0 and mota > -0.5:
-                    keys[1] = 1
+            if mota > 0.5:
+                keys[4] = 1
+            elif mota >= 0:
+                keys[0] = 1
+            elif mota < 0.5:
+                keys[5] = 1
+            elif mota < 0:
+                keys[1] = 1
 
-            if motb > 0 and motb < 0.5:
-                    keys[2] = 1
-            elif motb <= 0 and motb > - 0.5:
-                    keys[3] = 1
-
-                # activate2 = player_robot.simulation_move(
-                #     vl, vr, dt, wall_list, SCREEN)
-            activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
+            if motb > 0.5:
+                keys[4] = 1
+            elif motb >= 0:
+                keys[2] = 1
+            elif motb < 0.5:
+                keys[5] = 1
+            elif motb < 0:
+                keys[3] = 1
+            activate2 = player_robot.simulation_move(
+                mota, motb, dt, wall_list, SCREEN)
+            # activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
             deltat += 1
 
+            # activate2 = player_robot.simulation_move(
+            #     vl, vr, dt, wall_list, SCREEN)
+            activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
+            deltat += 1
 
             if player_robot.wallCollisions > 0:
                 print('Closed because of collision')
@@ -872,11 +884,11 @@ class Robot(object):
             # ---
             # print(output)
 
-            
             timer_text = MAIN_FONT.render(
-            f"Timer = {round(time.time() - start_time, 2)}",
-            1, (255,255,255))
-            SCREEN.blit(timer_text, (10, HEIGHT - timer_text.get_height() - 10))
+                f"Timer = {round(time.time() - start_time, 2)}",
+                1, (255, 255, 255))
+            SCREEN.blit(timer_text, (10, HEIGHT -
+                        timer_text.get_height() - 10))
             pygame.display.update()
             # print(score)
         return score
