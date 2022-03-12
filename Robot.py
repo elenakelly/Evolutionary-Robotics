@@ -566,9 +566,9 @@ def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
 
 def evaluate_fitness(self, remaining_dust):
     if remaining_dust:
-        dust_score = (10 / remaining_dust)
+        dust_score = (100 / remaining_dust)
     else:
-        dust_score = 10
+        dust_score = 100
 
     total_score = dust_score - self.wallCollisions * 0.0001
     #print("Wall Collisions: ", self.wallCollisions)
@@ -660,7 +660,7 @@ class Wall():
 
     def draw(self, screen):
         if not self.istransparent:
-            pygame.draw.rect(screen, (51, 51, 38), self.rect)
+            pygame.draw.rect(screen, (49, 60, 60), self.rect)
 
 
 class Dust:
@@ -722,7 +722,7 @@ class Robot(object):
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                       Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
-        wall_list3 = [Wall(100, 40, 20, 300, False), Wall(600, 300, 20, 300, False),
+        wall_list = [Wall(100, 40, 20, 300, False), Wall(260, 200, 20, 400, False),Wall(500, 40, 20, 400, False),Wall(700, 200, 20, 400, False),
                       Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                       Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
@@ -735,7 +735,7 @@ class Robot(object):
                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
         
-        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+        wall_list5 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
                 Wall(500, 150, 20, 220, False),Wall(700, 150, 20, 370, False),
                 Wall(0, 150, 500, 20, False), Wall(0, 60, 800, 20, False),Wall(700, 150, 800, 20, False),
                 Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
@@ -763,7 +763,7 @@ class Robot(object):
         ,(Dust(550, 90, DUST, 3)),(Dust(450, 90, DUST, 3)),(Dust(350, 90, DUST, 3)),(Dust(250, 90, DUST, 3)),
         (Dust(150, 90, DUST, 3)),(Dust(50, 90, DUST, 3)),(Dust(650, 90, DUST, 3)),(Dust(750, 90, DUST, 3))]
 
-        dustImg = list1
+        dustImg = list
         '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
             80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))
             , (Dust(400, 400, DUST, 7)), (Dust(350, 300, DUST, 7)), (Dust(400, 410, DUST, 7)), (Dust(370, 390, DUST, 7))
@@ -789,7 +789,7 @@ class Robot(object):
 
 
         # simulation loop
-        while time.time() - start_time < 15:
+        while time.time() - start_time < 60:
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -845,24 +845,57 @@ class Robot(object):
             #if deltat > 2:
             keys = [0, 0, 0, 0, 0, 0, 0]
             output, feedback = nn.runNN(sensors)
-            [mota, motb] = output
+            [mota, motb] = output 
             deltat = 0
-            if mota > 0 and mota < 0.5:
-                    keys[0] = 1
+            
+            '''if mota > 0 and mota < 0.5:
+                keys[0] = 1
             elif mota <= 0 and mota > -0.5:
-                    keys[1] = 1
-
-            if motb > 0 and motb < 0.5:
-                    keys[2] = 1
-            elif motb <= 0 and motb > - 0.5:
-                    keys[3] = 1
-
-                # activate2 = player_robot.simulation_move(
-                #     vl, vr, dt, wall_list, SCREEN)
-            activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
+                keys[1] = 1
+            elif motb > 0 :
+                keys[2] = 1
+            elif motb <= 0 :
+                keys[3] = 1
+            elif mota == motb :
+                keys[4] = 1
+            elif mota == motb :
+                keys[5] = 1
+            elif mota == 0 and motb == 0:
+                keys[6] = 1
+                
+                
+            if mota > 0 and motb > 0:
+                keys[0] = 1
+                keys[2] = 1
+            elif mota <= 0 and motb < 0:
+                keys[1] = 1
+                keys[3] = 1
+            elif motb > 0  and mota <0:
+                keys[2] = 1
+                keys[1] = 1
+            elif mota> 0 and motb < 0 :
+                keys[0] = 1
+                keys[3] = 1
+            elif mota == motb :
+                keys[4] = 1
+            elif mota == motb :
+                keys[5] = 1
+            elif mota == 0 and motb == 0:
+                keys[6] = 1'''
+ 
+            [vl, vr] = output
+            activate2 = player_robot.simulation_move(
+                     vl, vr, dt, wall_list, SCREEN)
+            #activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
             deltat += 1
 
 
+            if player_robot.vl == -player_robot.vr or player_robot.vr == -player_robot.vl :
+                print('Closed because of instability')
+                return score
+            elif player_robot.vl == 0 or player_robot.vl == -0 and player_robot.vr == 0 or player_robot.vr == -0:
+                print ("Closed because of 0 velocity")
+                return score 
             if player_robot.wallCollisions > 0:
                 print('Closed because of collision')
                 return score
