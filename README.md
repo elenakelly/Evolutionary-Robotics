@@ -5,7 +5,7 @@
 • Used mobile robot simulator</br>
 • Used ANN as controller </br>
 • Used EA to evolve weights of ANN </br>
-• Design our own rooms </br>
+• Designed our own rooms </br>
 
 CODE DIVISION :</br>
 
