@@ -710,74 +710,99 @@ class Robot(object):
         # walls
 
         wall_pixel_offset = 42
-        wall_list1 = [Wall(110, 200, 291, 20, False), Wall(400, 39, 20, 300, False),
-                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+        
+        #no walls
+        wall_list1 = [ Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                       Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                       Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
-        wall_list2 = [Wall(200, 300, 400, 20, False), Wall(400, 150, 20, 430, False),
+        #aisle
+        wall_list2 = [Wall(0, 500, 800, 20, False), Wall(0, 350, 800, 20, False),
                       Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                       Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                       Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
-
-        wall_list = [Wall(100, 40, 20, 300, False), Wall(260, 200, 20, 400, False), Wall(500, 40, 20, 400, False), Wall(700, 200, 20, 400, False),
-                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
-
-        wall_list4 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+        #corner turn
+        wall_list = [Wall(0, 500, 720, 20, False), Wall(0, 350, 520, 20, False),
                       Wall(500, 20, 20, 347, False), Wall(
                           700, 25, 20, 490, False),
                       Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                       Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                            True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]              
+        #four walls
+        wall_list4 = [Wall(100, 40, 20, 300, False), Wall(260, 200, 20, 400, False), Wall(500, 40, 20, 400, False), Wall(700, 200, 20, 400, False),
+                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
-        wall_list = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+        #two turns
+        wall_list5 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
                      Wall(500, 150, 20, 220, False), Wall(
                          700, 150, 20, 370, False),
-                     Wall(0, 150, 500, 20, False), Wall(0, 60, 800,
-                                                        20, False), Wall(700, 150, 800, 20, False),
+                     Wall(0, 150, 500, 20, False), Wall(0, 60, 800, 20, False), Wall(700, 150, 800, 20, False),
                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
                      True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
-        wall_list5 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
-                      Wall(500, 150, 20, 220, False), Wall(
-                          700, 150, 20, 370, False),
-                      Wall(0, 150, 500, 20, False), Wall(0, 60, 800,
-                                                         20, False), Wall(700, 150, 800, 20, False),
-                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
-                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
         list = []
         x = 5
 
         for i in range(30):
-            x += 40
-            y = 5
+            x += 25
+            y = 3
             for j in range(30):
-                y += 30
+                y += 50
                 list.append((Dust(x, y, DUST, i)))
-
+        #two turns
         list1 = [(Dust(600, 340, DUST, 1)), Dust(600, 440, DUST, 2), (Dust(600, 140, DUST, 3)),
                  (Dust(650, 300, DUST, 1)), Dust(
                      650, 400, DUST, 2), (Dust(650, 100, DUST, 3)),
                  (Dust(650, 200, DUST, 3)), (Dust(600, 240, DUST, 3)), (Dust(600, 220, DUST, 3)), (Dust(600, 320, DUST, 3)), (Dust(600, 120, DUST, 3)), (Dust(600, 420, DUST, 3)), (Dust(550, 260, DUST, 3)), (Dust(550, 360, DUST, 3)), (Dust(550, 160, DUST, 3)), (Dust(550, 460, DUST, 3)), (Dust(450, 460, DUST, 3)), (Dust(350, 460, DUST, 3)), (Dust(
                      250, 460, DUST, 3)), (Dust(150, 460, DUST, 3)), (Dust(550, 390, DUST, 3)), (Dust(450, 390, DUST, 3)), (Dust(350, 390, DUST, 3)), (Dust(250, 390, DUST, 3)), (Dust(150, 390, DUST, 3)), (Dust(100, 90, DUST, 3)), (Dust(550, 90, DUST, 3)), (Dust(450, 90, DUST, 3)), (Dust(350, 90, DUST, 3)), (Dust(250, 90, DUST, 3)),
                  (Dust(150, 90, DUST, 3)), (Dust(50, 90, DUST, 3)), (Dust(650, 90, DUST, 3)), (Dust(750, 90, DUST, 3))]
+        
+        #corner turn
+        list4 = [(Dust(600, 340, DUST, 1)), Dust(600, 440, DUST, 2), (Dust(600, 140, DUST, 3)),
+                 (Dust(650, 300, DUST, 4)), Dust(650, 400, DUST, 5), (Dust(650, 100, DUST, 6)),
+                 (Dust(650, 200, DUST, 7)), (Dust(600, 240, DUST, 8)), (Dust(600, 220, DUST, 9)), 
+                 (Dust(600, 320, DUST, 10)), (Dust(600, 120, DUST, 11)), (Dust(600, 420, DUST, 12)), 
+                 (Dust(550, 260, DUST, 13)), (Dust(550, 360, DUST, 14)), (Dust(550, 160, DUST, 15)),
+                 (Dust(550, 460, DUST, 16)), (Dust(450, 460, DUST, 17)), (Dust(350, 460, DUST, 18)), 
+                 (Dust(250, 460, DUST, 19)), (Dust(150, 460, DUST, 20)), (Dust(550, 390, DUST, 21)), 
+                 (Dust(450, 390, DUST, 22)), (Dust(350, 390, DUST, 23)), (Dust(250, 390, DUST, 24)), 
+                 (Dust(150, 390, DUST, 25)), (Dust(600, 320, DUST, 26)), Dust(600, 420, DUST, 27), (Dust(600, 120, DUST, 28)),
+                 (Dust(630, 300, DUST, 29)), Dust(630, 400, DUST, 30), (Dust(630, 100, DUST, 31)),(Dust(630, 200, DUST, 32)), 
+                 (Dust(630, 220, DUST, 33)), (Dust(630, 320, DUST, 34)), (Dust(630, 120, DUST, 35)), (Dust(630, 420, DUST, 36)), 
+                 (Dust(530, 260, DUST, 37)), (Dust(530, 360, DUST, 38)), (Dust(530, 160, DUST, 39)), (Dust(530, 460, DUST, 40)), 
+                 (Dust(430, 460, DUST, 41)), (Dust(330, 460, DUST, 42)), (Dust(230, 460, DUST, 43)), (Dust(130, 460, DUST, 44)), 
+                 (Dust(530, 390, DUST, 45)), (Dust(430, 390, DUST, 46)), (Dust(330, 390, DUST, 47)), (Dust(230, 390, DUST, 48)), 
+                 (Dust(130, 390, DUST, 49)),(Dust(550, 430, DUST, 50)), (Dust(450, 430, DUST, 51)), (Dust(350, 430, DUST, 52)), 
+                 (Dust(250, 430, DUST, 53)), (Dust(150, 430, DUST, 54)),(Dust(430, 430, DUST, 55)), (Dust(330, 430, DUST, 56)), 
+                 (Dust(230, 430, DUST, 57)),(Dust(530, 430, DUST, 58))]
+        #aisle        
+        list5 = [(Dust(550, 460, DUST, 1)),(Dust(550, 390, DUST, 2)),(Dust(550, 430, DUST, 3)),
+                 (Dust(525, 460, DUST, 4)), (Dust(525, 390, DUST, 5)),(Dust(525, 430, DUST, 6)),
+                 (Dust(600, 460, DUST, 7)),(Dust(600, 390, DUST, 8)),(Dust(600, 430, DUST, 9)),
+                 (Dust(450, 460, DUST, 10)),(Dust(450, 390, DUST, 11)), (Dust(450, 430, DUST, 12)),
+                 (Dust(350, 460, DUST, 13)),(Dust(350, 390, DUST, 14)),(Dust(350, 430, DUST, 15)),
+                 (Dust(250, 460, DUST, 16)),(Dust(250, 390, DUST, 17)), (Dust(250, 430, DUST, 18)),
+                 (Dust(425, 460, DUST, 19)),(Dust(425, 390, DUST, 20)),(Dust(430, 430, DUST, 21)),
+                 (Dust(150, 460, DUST, 22)),(Dust(150, 390, DUST, 23)),(Dust(150, 430, DUST, 24)),
+                 (Dust(325, 460, DUST, 25)), (Dust(325, 390, DUST, 26)),(Dust(325, 430, DUST, 27)), 
+                 (Dust(225, 460, DUST, 28)), (Dust(225, 390, DUST, 29)),(Dust(225, 430, DUST, 25)),
+                 (Dust(125, 460, DUST, 31)), (Dust(125, 390, DUST, 32)),(Dust(125, 430, DUST, 33)),
+                 (Dust(325, 460, DUST, 34)),(Dust(325, 390, DUST, 35)),(Dust(325, 430, DUST, 36)), 
+                 (Dust(650, 460, DUST, 37)),(Dust(650, 390, DUST, 38)),(Dust(650, 430, DUST, 39)),
+                 (Dust(625, 460, DUST, 37)),(Dust(625, 390, DUST, 38)),(Dust(625, 430, DUST, 39)),
+                 (Dust(700, 460, DUST, 40)),(Dust(700, 390, DUST, 41)),(Dust(700, 430, DUST, 42)),
+                 (Dust(725, 460, DUST, 43)),(Dust(725, 390, DUST, 44)),(Dust(725, 430, DUST, 45))]
 
-        dustImg = list1
-        '''[(Dust(340, 340, DUST, 1)), Dust(440, 440, DUST, 2), (Dust(500, 500, DUST, 3)), (Dust(
-            80, 150, DUST, 4)), (Dust(240, 100, DUST, 5)), (Dust(500, 127, DUST, 6)), (Dust(122, 250, DUST, 7))
-            , (Dust(400, 400, DUST, 7)), (Dust(350, 300, DUST, 7)), (Dust(400, 410, DUST, 7)), (Dust(370, 390, DUST, 7))
-                   , (Dust(400, 505, DUST, 7)), (Dust(410, 430, DUST, 7)), (Dust(450, 420, DUST, 7))]'''
+        dustImg = list4
 
         # enviroment prints
         environment = Envir([600, 800])
@@ -799,6 +824,7 @@ class Robot(object):
 
         # simulation loop
         while time.time() - start_time < 15:
+            
             # activate quit button
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -846,12 +872,7 @@ class Robot(object):
             sensors = cast_rays(SCREEN, walls, player_robot,
                                 ROBOT, STEP_ANGLE, SENSORS_FONT)
 
-            '''if deltat > 2:
-                output, feedback = nn.runNN(sensors)
-                [vl, vr] = output
-                deltat = 0
-                activate2 = player_robot.simulation_move(vl, vr, dt, wall_list, SCREEN)
-            deltat += 1'''
+
 
             # if deltat > 2:
             keys = [0, 0, 0, 0, 0, 0, 0]
@@ -859,49 +880,29 @@ class Robot(object):
             [mota, motb] = output
             deltat = 0
 
-            '''if mota > 0 and mota < 0.5:
-                keys[0] = 1
-            elif mota <= 0 and mota > -0.5:
-                keys[1] = 1
-            elif motb > 0 :
-                keys[2] = 1
-            elif motb <= 0 :
-                keys[3] = 1
-            elif mota == motb :
+            #translate the output as keys (didnt work)
+            '''if mota > 0.5:
                 keys[4] = 1
-            elif mota == motb :
-                keys[5] = 1
-            elif mota == 0 and motb == 0:
-                keys[6] = 1
-                
-                
-            if mota > 0 and motb > 0:
+            elif mota >= 0:
                 keys[0] = 1
-                keys[2] = 1
-            elif mota <= 0 and motb < 0:
-                keys[1] = 1
-                keys[3] = 1
-            elif motb > 0  and mota <0:
-                keys[2] = 1
-                keys[1] = 1
-            elif mota> 0 and motb < 0 :
-                keys[0] = 1
-                keys[3] = 1
-            elif mota == motb :
-                keys[4] = 1
-            elif mota == motb :
+            elif mota < 0.5:
                 keys[5] = 1
-            elif mota == 0 and motb == 0:
-                keys[6] = 1'''
+            elif mota < 0:
+                keys[1] = 1
 
+            if motb > 0.5:
+                keys[4] = 1
+            elif motb >= 0:
+                keys[2] = 1
+            elif motb < 0.5:
+                keys[5] = 1
+            elif motb < 0:
+                keys[3] = 1'''
+
+            #translate the ooutput as velocities
             [vl, vr] = output
             activate2 = player_robot.simulation_move(
                 vl, vr, dt, wall_list, SCREEN)
-            #activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
-            deltat += 1
-
-            # activate2 = player_robot.simulation_move(
-            #     vl, vr, dt, wall_list, SCREEN)
             #activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
             deltat += 1
 
@@ -920,6 +921,7 @@ class Robot(object):
             # ---
             # print(output)
 
+            # screen timer 
             timer_text = MAIN_FONT.render(
                 f"Timer = {round(time.time() - start_time, 2)}",
                 1, (255, 255, 255))
