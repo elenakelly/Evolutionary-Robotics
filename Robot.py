@@ -823,7 +823,7 @@ class Robot(object):
         start_time = time.time()
 
         # simulation loop
-        while time.time() - start_time < 15:
+        while time.time() - start_time < 15: #set time experiment
             
             # activate quit button
             for event in pygame.event.get():
@@ -861,27 +861,24 @@ class Robot(object):
             vel_text = MAIN_FONT.render(string, 4, (255, 255, 255))
             SCREEN.blit(vel_text, (50, 10))
 
-            # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
-            # sensors = cast_rays(SCREEN, walls, player_robot,
-            # ROBOT, STEP_ANGLE, SENSORS_FONT)
-
             score = evaluate_fitness(
                 player_robot, environment.dustCheck(dustImg))
 
-            # Example of network run
+            # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
+
             sensors = cast_rays(SCREEN, walls, player_robot,
                                 ROBOT, STEP_ANGLE, SENSORS_FONT)
-
-
-
-            # if deltat > 2:
-            keys = [0, 0, 0, 0, 0, 0, 0]
+            
             output, feedback = nn.runNN(sensors)
-            [mota, motb] = output
-            deltat = 0
 
+
+            deltat = 0
             #translate the output as keys (didnt work)
-            '''if mota > 0.5:
+            '''
+            keys = [0, 0, 0, 0, 0, 0, 0]  
+            [mota, motb] = output
+            
+            if mota > 0.5:
                 keys[4] = 1
             elif mota >= 0:
                 keys[0] = 1
