@@ -7,13 +7,11 @@
 • Used EA to evolve weights of ANN </br>
 • Designed our own rooms </br>
 
-CODE DIVISION :</br>
+CODE DIVISION : </br>
 
-(note: robot and EA on benchmark functions were imported from the previous assigments) </br>
-
-Elena Kane i6289291 - </br>
-Nikolaos Ntantis i6273751 - </br>
-Ioannis Montesantos i6292068 - </br>
+Elena Kane i6289291 - Robot connections & experiments  </br>
+Nikolaos Ntantis i6273751 - Evolution Algorithm  </br>
+Ioannis Montesantos i6292068 - Neural Network & Robot fixes </br>
 
 
 ANN:</br>
