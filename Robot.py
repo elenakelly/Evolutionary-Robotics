@@ -1,36 +1,11 @@
-from re import I
 import pygame
 import numpy as np
 import math
-import random
-from Filter import KalmanFilter
+import robotNN
 import time
 
-# initialisation of game
-pygame.font.init()
-
-# images
-BACKGROUND = pygame.transform.scale(
-    pygame.image.load("images/background.png"), (600, 800))
-ROBOT = pygame.image.load("images/vacuum.png")
-ICON = pygame.image.load('images/icon.png')
-DUST = pygame.image.load('images/dust.png')
-
-# main sceen
-WIDTH, HEIGHT = 600, 800  # dimensions
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-# window setting
-pygame.display.set_caption("Mobile Robot Simulator")
-pygame.display.set_icon(ICON)
-pygame.rect.Rect
-MAIN_FONT = pygame.font.SysFont("comicsans", 22)
-SENSORS_FONT = pygame.font.SysFont("comicsans", 12)
-# SENSORS - Divide circumference by number of sensors
-CAST_RAYS = 24
-STEP_ANGLE = (math.pi * 2) / CAST_RAYS
-
-
-# image visual rotation
+# os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 
 def blit_rotate_center(win, image, top_left, angle):
@@ -40,37 +15,42 @@ def blit_rotate_center(win, image, top_left, angle):
     win.blit(rotated_image, new_rect.topleft)
 
 
+def blit_text_center(win, font, text):
+    render = font.render(text, 1, (200, 200, 200))
+    win.blit(render, (win.get_width() / 2 - render.get_width() /
+                      2, win.get_height() / 2 - render.get_height() / 2))
+
+
 # Robot movement
 
 
 class RobotMove:
-    def __init__(self, error_mov=0, error_rot=0):
-        self.img = self.IMG  # image
+    def __init__(self, IMG):
+        self.trail_set = []
+
+        self.img = IMG  # image
         self.x = self.START_POS[0]  # starting x
         self.y = self.START_POS[1]  # starting y
 
-        self.v = 0  # translated velocity
-        self.w = 0  # angular velocitty
-        self.speed = 0.5
-        self.side = 0.01
+        self.m2p = 3779.52  # meters to pixels
+        self.vl = 0  # left velocity
+        self.vr = 0  # right velocity
         self.theta = 0
-        # self.theta = -math.pi/2
-        self.sensor_limit = 200
-
+        self.speed = 0.001
         distance = 64
         # distance between the centers of the two wheels
-        self.l = int(ROBOT.get_width())
+        self.l = int(IMG.get_width())
+
         self.changeX = self.x + (self.l / 2)
         self.changeY = self.y
 
         self.rect = pygame.Rect(
-            self.x, self.y, ROBOT.get_width(), ROBOT.get_height())
-
-        # localization stuff
-        self.movement_error = 0.1
-        self.believe_states = [[self.x, self.y, self.theta]]
-        self.error_mov = error_mov
-        self.error_rot = error_rot
+            self.x, self.y, IMG.get_width(), IMG.get_height())
+        self.rotated = self.img
+        self.rect = self.rotated.get_rect(center=(self.x, self.y))
+        self.dustCleared = 0
+        self.wallCollisions = 0
+        self.hasCollided = False
 
     # draw and rotate the image
 
@@ -78,216 +58,452 @@ class RobotMove:
         blit_rotate_center(win, self.img, (self.x, self.y),
                            math.degrees(-self.theta))
 
-    def move(self, keys, dt):
+    def simulation_move(self, vl, vr, dt, wall_list, screen):
 
-        # setting the buttons PYGAME ADJUSTMENT left=right velocities
-        if keys[0] == 1:
-            self.v += self.speed
-        if keys[1] == 1:
-            self.v -= self.speed
-        if keys[2] == 1:
-            self.w -= self.side
-        if keys[3] == 1:
-            self.w += self.side
-        if keys[4] == 1:
-            self.v = 0
-            self.w = 0
-
-        # next_x, next_y = self.x, self.y
+        self.vl = vl
+        self.vr = vr
+        next_x, next_y = self.x, self.y
 
         # check model
-        if self.v != 0 or self.w != 0:
-            # Computation of ICC
-            centerx = self.x + (ROBOT.get_width() / 2)
-            centery = self.y + (ROBOT.get_height() / 2)
+        if self.vr != 0 or self.vl != 0:
+            if self.vl == self.vr:
+                next_x = self.x + ((self.vl + self.vr) / 2) * \
+                    np.cos(-self.theta) * dt
+                next_y = self.y - ((self.vl + self.vr) / 2) * \
+                    np.sin(-self.theta) * dt
+                R = np.inf
+                w = 0
+            else:
+                R = (self.l / 2) * (self.vl + self.vr) / (self.vr - self.vl)
+                w = (self.vr - self.vl) / self.l
 
-            a = [self.x, self.y, self.theta]
-            b = [[dt * math.cos(self.theta), 0],
-                 [dt * math.sin(self.theta), 0],
-                 [0, dt]]
-            c = [self.v, self.w]
-            rotation = np.dot(b, c)
-            M = a + rotation
+                # Computation of ICC
 
-            # DRAW LINE MOVE VECTOR
-            pygame.display.flip()
+                centerx = self.x + (self.img.get_width() / 2)
+                centery = self.y + (self.img.get_height() / 2)
+                ICC = [centerx - R * np.sin(self.theta),
+                       centery + R * np.cos(self.theta)]
 
-            # next_x = M[0]-(ROBOT.get_width()/2)
-            # next_y = M[1]-(ROBOT.get_height()/2)
-            next_x = M[0]
-            next_y = M[1]
-            # print("-")
-            new_theta = M[2]
+                a = [[np.cos(w * dt), -np.sin(w * dt), 0],
+                     [np.sin(w * dt), np.cos(w * dt), 0], [0, 0, 1]]
+                b = [centerx - ICC[0], centery - ICC[1], self.theta]
+                rotation = np.dot(a, b)
+                rotation = rotation + [ICC[0], ICC[1], w * dt]
 
-            self.x = next_x
-            self.y = next_y
-            self.theta = new_theta
+                pygame.draw.line(screen, (255, 255, 0), (centerx, centery),
+                                 (ICC[0], ICC[1]), 3)
+                pygame.display.flip()
+
+                next_x = rotation[0] - (self.img.get_width() / 2)
+                next_y = rotation[1] - (self.img.get_height() / 2)
+                self.theta = rotation[2]
 
         self.rotated = pygame.transform.rotozoom(
             self.img, math.degrees(self.theta), 1)
 
-        if self.error_mov != 0:
-            if random.random() < self.movement_error:
-                if self.v != 0 and self.w != 0:
-                    self.x += (np.random.normal(self.error_mov[0], self.error_mov[1]))
-            if random.random() < self.movement_error:
-                if self.v != 0 and self.w != 0:
-                    self.y += (np.random.normal(self.error_mov[0], self.error_mov[1]))
-        if self.error_rot != 0:
-            if random.random() < self.movement_error:
-                if self.v == 0 and self.w == 0:
-                    self.theta = self.theta
-                else:
-                    self.theta += (np.random.normal(self.error_rot[0], self.error_rot[1]))
+        self.collide2((self.x, self.y), (next_x, next_y), wall_list)
+
+    def move(self, keys, dt, wall_list, screen):
+
+        # setting the buttons
+        if keys[0] == 1:
+            self.vl += self.speed
+        if keys[1] == 1:
+            self.vl -= self.speed
+        if keys[2] == 1:
+            self.vr += self.speed
+        if keys[3] == 1:
+            self.vr -= self.speed
+        if keys[4] == 1:
+            self.vl == self.vr
+            self.vr += self.speed
+            self.vl += self.speed
+        if keys[5] == 1:
+            self.vl == self.vr
+            self.vr -= self.speed
+            self.vl -= self.speed
+        if keys[6] == 1:
+            self.vl = 0
+            self.vr = 0
+
+        next_x, next_y = self.x, self.y
+
+        # check model
+        if self.vr != 0 or self.vl != 0:
+            if self.vl == self.vr:
+                next_x = self.x + ((self.vl + self.vr) / 2) * \
+                    np.cos(-self.theta) * dt
+                next_y = self.y - ((self.vl + self.vr) / 2) * \
+                    np.sin(-self.theta) * dt
+                R = np.inf
+                w = 0
+            else:
+                R = (self.l / 2) * (self.vl + self.vr) / (self.vr - self.vl)
+                w = (self.vr - self.vl) / self.l
+
+                # Computation of ICC
+
+                centerx = self.x + (self.img.get_width() / 2)
+                centery = self.y + (self.img.get_height() / 2)
+                ICC = [centerx - R * np.sin(self.theta),
+                       centery + R * np.cos(self.theta)]
+
+                a = [[np.cos(w * dt), -np.sin(w * dt), 0],
+                     [np.sin(w * dt), np.cos(w * dt), 0], [0, 0, 1]]
+                b = [centerx - ICC[0], centery - ICC[1], self.theta]
+                rotation = np.dot(a, b)
+                rotation = rotation + [ICC[0], ICC[1], w * dt]
+
+                pygame.draw.line(screen, (255, 255, 0), (centerx, centery),
+                                 (ICC[0], ICC[1]), 3)
+                pygame.display.flip()
+
+                next_x = rotation[0] - (self.img.get_width() / 2)
+                next_y = rotation[1] - (self.img.get_height() / 2)
+                self.theta = rotation[2]
+
+        self.rotated = pygame.transform.rotozoom(
+            self.img, math.degrees(self.theta), 1)
+
+        self.collide2((self.x, self.y), (next_x, next_y), wall_list)
 
     def upd_rect(self):
         self.rect.x = self.x
         self.rect.y = self.y
 
+    def is_colliding(self, cur_pos, next_pos, wall_list):
+        uper_col = [False, 0]
+        bottom_col = [False, 0]
+        right_col = [False, 0]
+        left_col = [False, 0]
 
-# -------------------------------------------------------------------------------
+        temp_new = next_pos
+
+        incremented_x = cur_pos[0]
+        incremented_y = cur_pos[1]
+
+        # MOVING LEFT UP
+        if cur_pos[0] >= temp_new[0] and cur_pos[1] > temp_new[1]:
+
+            searching = [True, True]
+            switch_increment = True  # True increments x
+
+            while searching[0] == True or searching[1] == True:
+
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
+
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
+
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
+
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                if incremented_x <= temp_new[0] or right_col[0] or left_col[0]:
+                    searching[0] = False
+                if incremented_y <= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if bottom_col[0] and right_col[0]:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if bottom_col[0] and searching[0] == False:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if right_col[0] and searching[1] == False:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x - 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y - 1
+                    switch_increment = not switch_increment
+
+        # MOVING RIGHT BOTTOM
+        elif cur_pos[0] < temp_new[0] and cur_pos[1] <= temp_new[1]:
+
+            searching = [True, True]
+            switch_increment = True  # True increments x
+
+            while searching[0] == True or searching[1] == True:
+
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
+
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
+
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
+
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                if incremented_x >= temp_new[0] or right_col[0] or left_col[0]:
+                    searching[0] = False
+                if incremented_y >= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if uper_col[0] and left_col[0]:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if uper_col[0] and searching[0] == False:
+                    return uper_col, bottom_col, right_col, left_col
+                if left_col[0] and searching[1] == False:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x + 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y + 1
+                    switch_increment = not switch_increment
+
+        # MOVE LEFT BOTTOM
+        elif cur_pos[0] >= temp_new[0] and cur_pos[1] <= temp_new[1]:
+
+            searching = [True, True]
+            switch_increment = True  # True increments x
+
+            while searching[0] == True or searching[1] == True:
+
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
+
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
+
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
+
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                if incremented_x <= temp_new[0] or left_col[0] or right_col[0]:
+                    searching[0] = False
+                if incremented_y >= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if uper_col[0] and left_col[0]:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if uper_col[0] and searching[0] == False:
+                    return uper_col, bottom_col, right_col, left_col
+                if left_col[0] and searching[1] == False:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x - 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y + 1
+                    switch_increment = not switch_increment
+
+        # MOVE RIGHT UP
+        elif cur_pos[0] < temp_new[0] and cur_pos[1] > temp_new[1]:
+
+            searching = [True, True]
+            switch_increment = True  # True increments x
+
+            while searching[0] == True or searching[1] == True:
+
+                next_rect = pygame.Rect(
+                    incremented_x, incremented_y, self.img.get_width(), self.img.get_height())
+
+                for wall in wall_list:
+                    if next_rect.colliderect(wall.rect):
+
+                        if abs(wall.rect.top - next_rect.bottom) <= 10:
+                            # print("upper col")
+                            uper_col[0] = True
+                            uper_col[1] = wall.rect.top - \
+                                self.img.get_height()
+                        elif abs(wall.rect.bottom - next_rect.top) <= 10:
+                            # print("bottom col")
+                            bottom_col[0] = True
+                            bottom_col[1] = wall.rect.bottom
+
+                        if abs(wall.rect.right - next_rect.left) <= 10:
+                            # print("right col")
+                            right_col[0] = True
+                            right_col[1] = wall.rect.right
+                        elif abs(wall.rect.left - next_rect.right) <= 10:
+                            # print("left col")
+                            left_col[0] = True
+                            left_col[1] = wall.rect.left - \
+                                self.img.get_width()
+
+                if incremented_x >= temp_new[0] or left_col[0] or right_col[0]:
+                    searching[0] = False
+                if incremented_y <= temp_new[1] or uper_col[0] or bottom_col[0]:
+                    searching[1] = False
+
+                if bottom_col[0] and left_col[0]:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if bottom_col[0] and searching[0] == False:
+                    return uper_col, bottom_col, right_col, left_col
+                if left_col[0] and searching[1] == False:
+                    return uper_col, bottom_col, right_col, left_col
+
+                if switch_increment:
+                    if searching[0]:
+                        incremented_x = incremented_x + 1
+                    switch_increment = not switch_increment
+                else:
+                    if searching[1]:
+                        incremented_y = incremented_y - 1
+                    switch_increment = not switch_increment
+
+        for wall in wall_list:
+
+            next_rect = pygame.Rect(
+                next_pos[0], next_pos[1], self.img.get_width(), self.img.get_height())
+
+            if next_rect.colliderect(wall.rect):
+
+                if abs(wall.rect.top - self.rect.bottom) <= 10:
+                    # print("upper col")
+                    uper_col[0] = True
+                    uper_col[1] = wall.rect.top - self.img.get_height()
+                elif abs(wall.rect.bottom - self.rect.top) <= 10:
+                    # print("bottom col")
+                    bottom_col[0] = True
+                    bottom_col[1] = wall.rect.bottom
+
+                if abs(wall.rect.right - self.rect.left) <= 10:
+                    # print("right col")
+                    right_col[0] = True
+                    right_col[1] = wall.rect.right
+                elif abs(wall.rect.left - self.rect.right) <= 10:
+                    # print("left col")
+                    left_col[0] = True
+                    left_col[1] = wall.rect.left - self.img.get_width()
+
+        return uper_col, bottom_col, right_col, left_col
+
+    def collide(self, cur_pos, next_pos, width, height):
+        self.boundaryX = width - 64
+        self.boundaryY = height - 64
+        # hit the wall
+        if self.x <= 41:
+            self.x = 41
+            if self.hasCollided != True:
+                self.wallCollisions += 1
+            self.hasCollided = True
+
+        elif self.x >= self.boundaryX - 42:
+            self.x = self.boundaryX - 42
+            if self.hasCollided != True:
+                self.wallCollisions += 1
+            self.hasCollided = True
+
+        if self.y <= 41:
+            self.y = 41
+            if self.hasCollided != True:
+                self.wallCollisions += 1
+            self.hasCollided = True
+
+        elif self.y >= self.boundaryY - 42:
+            self.y = self.boundaryY - 42
+            if self.hasCollided != True:
+                self.wallCollisions += 1
+            self.hasCollided = True
+
+    def collide2(self, cur_pos, next_pos, wall_list):
+
+        u_col, b_col, r_col, l_col = self.is_colliding(
+            cur_pos, next_pos, wall_list)
+
+        if u_col[0] or b_col[0] or r_col[0] or l_col[0]:
+            if self.hasCollided != True:
+                self.wallCollisions += 1
+            self.hasCollided = True
+        else:
+            self.hasCollided = False
+
+        if l_col[0]:
+            self.x = l_col[1]
+
+        elif r_col[0]:
+            self.x = r_col[1]
+
+        else:
+            self.x = next_pos[0]
+
+        if u_col[0]:
+            self.y = u_col[1]
+
+        elif b_col[0]:
+            self.y = b_col[1]
+
+        else:
+            self.y = next_pos[1]
+
+
+class PlayRobot(RobotMove):
+    # START_POS = (random.uniform(40, 735), random.uniform(
+    #     40, 535))  # start at random potition
+    START_POS = (80, 400)
+    trail_set = []
+
+
 # Raycasting
 
 
-def find_beacon(screen, beacons):
-    sensor_x = player_robot.x + (ROBOT.get_width() / 2)
-    sensor_y = player_robot.y + (ROBOT.get_height() / 2)
-
-    beacons_in_proximity = []
-    collision_offset = 0
-    fi = None
-
-    for bc in range(len(beacons)):
-        dist = (math.sqrt(
-            (beacons[bc].y - sensor_y) ** 2 + (beacons[bc].x - sensor_x) ** 2)) - collision_offset
-        if dist < 150:
-            pygame.draw.line(screen, (0,255,0), (sensor_x,
-                                                       sensor_y), (beacons[bc].x, beacons[bc].y), 3)
-            # Calc fix
-            fi = math.atan2((beacons[bc].y - sensor_y),
-                            (beacons[bc].x - sensor_x)) - player_robot.theta
-            beacons_in_proximity.append(
-                (beacons[bc].x, beacons[bc].y, dist + collision_offset, -fi))
-            # print(beacons[bc].x, beacons[bc].y, dist+collision_offset)
-            pygame.draw.circle(screen, (25, 70, 150),
-                               (beacons[bc].x, beacons[bc].y), dist + collision_offset, 2)
-
-    if len(beacons_in_proximity) == 2:
-        x0 = beacons_in_proximity[0][0]
-        y0 = beacons_in_proximity[0][1]
-        r0 = beacons_in_proximity[0][2]
-        f0 = beacons_in_proximity[0][3]
-        x1 = beacons_in_proximity[1][0]
-        y1 = beacons_in_proximity[1][1]
-        r1 = beacons_in_proximity[1][2]
-        f1 = beacons_in_proximity[1][3]
-        # print(x0, y0, r0)
-        # print(x1, y1, r1)
-        # print("FI-1 by detection ", beacons_in_proximity[0][3])
-        # print("FI-2 by detection ", beacons_in_proximity[1][3])
-        # print("Theta ", player_robot.theta)
-
-        p1, p2, fipos1, fipos2 = circle_intersection(screen, x0, y0, r0, x1, y1,
-                                                     r1, True, (100, 10, 50), f0, f1)
-
-        # print("REAL POS", (f0, f1))
-        # print("POT POS 1", fipos1)
-        # print("POT POS 2", fipos2)
-
-        if f0 - 0.2 <= fipos1[0] <= f0 + 0.2 and f1 - 0.2 <= fipos1[1] <= f1 + 0.2:
-            # pygame.draw.circle(screen, (100, 10, 50), (p1[0], p1[1]), 5)
-            return (p1[0], p1[1], player_robot.theta)
-        else:
-            # pygame.draw.circle(screen, (100, 10, 50), (p2[0], p2[1]), 5)
-            return (p2[0], p2[1], player_robot.theta)
-
-    elif len(beacons_in_proximity) > 2:
-        x0 = beacons_in_proximity[0][0]
-        y0 = beacons_in_proximity[0][1]
-        r0 = beacons_in_proximity[0][2]
-        f0 = beacons_in_proximity[0][3]
-        x1 = beacons_in_proximity[1][0]
-        y1 = beacons_in_proximity[1][1]
-        r1 = beacons_in_proximity[1][2]
-        f1 = beacons_in_proximity[1][3]
-        x2 = beacons_in_proximity[2][0]
-        y2 = beacons_in_proximity[2][1]
-        r2 = beacons_in_proximity[2][2]
-        f2 = beacons_in_proximity[2][3]
-
-        p1, p2, fipos1, fipos2 = circle_intersection(screen, x0, y0, r0, x1, y1,
-                                                     r1, False, (255, 100, 153), f0, f1)
-        # pygame.draw.circle(screen, (150, 150, 15), (p1[0], p1[1]), 5)
-        # pygame.draw.circle(screen, (150, 150, 15), (p2[0], p2[1]), 5)
-        p3, p4, fipos3, fipos4 = circle_intersection(screen, x0, y0, r0, x2, y2,
-                                                     r2, False, (10, 210, 53), f0, f2)
-        # pygame.draw.circle(screen, (50, 150, 150), (p3[0], p3[1]), 5)
-        # pygame.draw.circle(screen, (50, 150, 150), (p4[0], p4[1]), 5)
-        p5, p6, fipos5, fipos6 = circle_intersection(screen, x1, y1, r1, x2, y2,
-                                                     r2, False, (180, 80, 80), f1, f2)
-        # pygame.draw.circle(screen, (150, 150, 150), (p5[0], p5[1]), 5)
-        # pygame.draw.circle(screen, (150, 150, 150), (p6[0], p6[1]), 5)
-
-        # print("P1, P2 ", p1[0], p1[1], p2[0], p2[1])
-        # print("P3, P4 ", p3[0], p3[1], p4[0], p4[1])
-        # print("P5, P6 ", p5[0], p5[1], p6[0], p6[1])
-
-        if p1[0] - 5 <= p3[0] <= p1[0] + 5 and p1[1] - 5 <= p3[1] <= p1[1] + 5:
-            # if (p1[0] - 3 < p5[0] < p1[0] + 3 and p1[1] - 3 < p5[1] < p1[1] + 3) or (p1[0] - 3 < p6[0] < p1[0] + 3 and p1[1] - 3 < p6[1] < p1[1] + 3):
-            # pygame.draw.circle(screen, (150, 150, 15), (p1[0], p1[1]), 5)
-            return (p1[0], p1[1], player_robot.theta)
-        elif p1[0] - 5 <= p4[0] <= p1[0] + 5 and p1[1] - 5 <= p4[1] <= p1[1] + 5:
-            # pygame.draw.circle(screen, (150, 150, 15), (p1[0], p1[1]), 5)
-            return (p1[0], p1[1], player_robot.theta)
-        else:
-            # pygame.draw.circle(screen, (150, 150, 15), (p2[0], p2[1]), 5)
-            return (p2[0], p2[1], player_robot.theta)
-
-
-def circle_intersection(screen, x0, y0, r0, x1, y1, r1, find_fi, circle_color, fi0, fi1):
-    d = math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
-
-    if d > r0 + r1:
-        return (0, 0), (0, 0), (0, 0), (0, 0)
-    elif d < abs(r0 - r1):
-        return (0, 0), (0, 0), (0, 0), (0, 0)
-    elif d == 0 and r0 == r1:
-        return (0, 0), (0, 0), (0, 0), (0, 0)
-    else:
-        a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
-        h = math.sqrt(abs(r0 ** 2 - a ** 2))
-        x2 = x0 + a * (x1 - x0) / d
-        y2 = y0 + a * (y1 - y0) / d
-        x3 = x2 + h * (y1 - y0) / d
-        y3 = y2 - h * (x1 - x0) / d
-
-        x4 = x2 - h * (y1 - y0) / d
-        y4 = y2 + h * (x1 - x0) / d
-
-        # pygame.draw.circle(screen, circle_color, (x3, y3), 5)
-        # pygame.draw.circle(screen, circle_color, (x4, y4), 5)
-        # print(x3, y3, x4, y4)
-        # print("Fi0 ", fi0)
-        # print("Fi1 ", fi1)
-
-        fi03 = math.atan2((y0 - y3),
-                          (x0 - x3)) - player_robot.theta
-        fi13 = math.atan2((y1 - y3),
-                          (x1 - x3)) - player_robot.theta
-        fi04 = math.atan2((y0 - y4),
-                          (x0 - x4)) - player_robot.theta
-        fi14 = math.atan2((y1 - y4),
-                          (x1 - x4)) - player_robot.theta
-
-        # print("FI pot pos 1 w beacon 1 ", fi03)
-        # print("FI pot pos 1 w beacon 2 ", fi13)
-        # print("FI pot pos 2 w beacon 1", fi04)
-        # print("FI pot pos 2 w beacon 2", fi14)
-
-        return (int(x3), int(y3)), (int(x4), int(y4)), (-fi03, -fi13), (-fi04, -fi14)
-
-
-def cast_rays(screen, beacons):
+def cast_rays(screen, walls, player_robot, ROBOT, STEP_ANGLE, SENSORS_FONT):
     all_sensors = []
     sensor_results = []
 
@@ -295,65 +511,148 @@ def cast_rays(screen, beacons):
     sensor_y = player_robot.y + (ROBOT.get_height() / 2)
 
     temp_angle = 0
+    for i in range(12):
+        all_sensors.append((sensor_x, sensor_y, temp_angle, temp_angle, i))
+        temp_angle += STEP_ANGLE
 
-    sensor_placement_offset = 8
-    sensor_placement_radius_depth = 64
-    collision_offset = 32
-
-    detected = []
-    beacon_found = False
-
-    for i in range(CAST_RAYS):
+    for sensor in all_sensors:
 
         clipped_line = None
 
+        sensor_placement_offset = 8
+        sensor_placement_radius_depth = 64
+        sensor_placement_x = sensor[0] - math.sin(
+            sensor[2]) * sensor_placement_radius_depth - sensor_placement_offset
+        sensor_placement_y = sensor[1] + math.cos(
+            sensor[3]) * sensor_placement_radius_depth - sensor_placement_offset
+        collision_offset = 32
+
         for depth in range(200):
-            target_x = sensor_x - math.sin(temp_angle) * depth
-            target_y = sensor_y + math.cos(temp_angle) * depth
+            target_x = sensor[0] - math.sin(sensor[2]) * depth
+            target_y = sensor[1] + math.cos(sensor[3]) * depth
 
             ray = ((sensor_x, sensor_y), (target_x, target_y))
 
-            for j in range(len(beacons)):
-                clipped_line = beacons[j].rect.clipline(ray)
+            detected = []
 
-                for k in detected:
-                    if k[1] == beacons[j].id:
-                        beacon_found = True
-                        break
-                if beacon_found:
-                    beacon_found = False
-                    continue
-
+            for i in range(len(walls)):
+                clipped_line = walls[i].clipline(ray)
                 if clipped_line:
-                    detected.append((clipped_line, beacons[j].id))
-                    break
-
-            if clipped_line:
-                break
+                    detected.append(clipped_line)
 
         sensor_distance = 200
-        if clipped_line:
-            temp_sensor_distance = int(
-                math.sqrt(
-                    (clipped_line[0][1] - sensor_y) ** 2 + (clipped_line[0][0] - sensor_x) ** 2)) - collision_offset
-            if temp_sensor_distance < sensor_distance:
-                sensor_distance = temp_sensor_distance
+        if detected:
+            for line in detected:
+                temp_sensor_distance = int(
+                    math.sqrt((line[0][1] - sensor_y) ** 2 + (line[0][0] - sensor_x) ** 2)) - collision_offset
+                if temp_sensor_distance < sensor_distance:
+                    sensor_distance = temp_sensor_distance
+                    clipped_line = line
 
             pygame.draw.line(screen, (255, 130, 100), (sensor_x, sensor_y),
                              (clipped_line[0][0], clipped_line[0][1]), 3)
-        sensor_results.append(sensor_distance)
-        # sensor_text = SENSORS_FONT.render(
-        #     f"{sensor_distance}", 1, (255, 255, 255))
-        # screen.blit(
-        #     sensor_text, (sensor_placement_x, sensor_placement_y))
 
-        temp_angle += STEP_ANGLE
+        sensor_results.append(sensor_distance)
+
+        sensor_text = SENSORS_FONT.render(
+            f"{sensor_distance}", 1, (255, 255, 255))
+        screen.blit(
+            sensor_text, (sensor_placement_x, sensor_placement_y))
 
     return sensor_results
+
     # ------------
 
 
-# -------------------------------------------------------------------------------------
+def evaluate_fitness(self, remaining_dust):
+    if remaining_dust:
+        dust_score = (100 / remaining_dust)
+    else:
+        dust_score = 100
+
+    total_score = dust_score - self.wallCollisions * 0.0001
+    #print("Wall Collisions: ", self.wallCollisions)
+
+    return total_score
+
+
+def dustEncountered(self, dustImg):
+    for dust in dustImg:
+        if self.rect.colliderect(dust.rect):
+            self.dustCleared += 1
+            # print("Dust", self.dustCleared)
+            dustImg.remove(dust)
+
+
+# setting the enviroment
+
+
+class Envir:
+    def __init__(self, dimension):
+        # colors
+        self.black = (0, 0, 0)
+        self.white = (255, 255, 255)
+        # map_dims
+        self.height = dimension[0]
+        self.width = dimension[1]
+        # window setting
+        self.map = pygame.display.set_mode((self.width, self.height))
+        # trail
+        self.trail_set = []
+        self.dust_remaining = 0
+
+    # line route
+
+    def trail(self, pos):
+        for i in range(0, len(self.trail_set) - 1):
+            pygame.draw.line(self.map, self.white, (self.trail_set[i][0], self.trail_set[i][1]),
+                             (self.trail_set[i + 1][0], self.trail_set[i + 1][1]))
+        if self.trail_set.__sizeof__() > 10000:
+            self.trail_set.pop(0)
+        self.trail_set.append(pos)
+
+    # y and x axis
+
+    def robot_frame(self, pos, rotation, robot):
+        n = 80
+        centerx = pos[0] + (robot.get_width() / 2)
+        centery = pos[1] + (robot.get_height() / 2)
+        x_axis = (centerx + n * np.cos(rotation),
+                  centery + n * np.sin(rotation))
+        y_axis = (centerx + n * np.cos(rotation + np.pi / 2),
+                  centery + n * np.sin(rotation + np.pi / 2))
+        pygame.draw.line(self.map, self.black, (centerx, centery), x_axis, 3)
+        pygame.draw.line(self.map, self.black, (centerx, centery), y_axis, 3)
+
+    def dustCheck(self, dustImg):
+        return len(dustImg)
+
+    def draw(self, screen, images, player_robot, MAIN_FONT, HEIGHT):
+
+        # display images on screen
+        for img, pos, name in images:
+            screen.blit(img, pos)
+
+        # display left, right velocity and theta on screen
+        vel_text = MAIN_FONT.render(
+            f"Vl = {round(player_robot.vl, 2)} Vr = {round(player_robot.vr, 2)} theta = {int(np.degrees(player_robot.theta))}",
+            1, self.white)
+        screen.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 40))
+
+        # display robot on screen
+        player_robot.draw(screen)
+        # pygame.display.update()
+
+    def setWalls(HEIGHT, WIDTH):
+        wall_pixel_offset = 42
+        rectWallL = pygame.Rect(0, 0, wall_pixel_offset, HEIGHT)
+        rectWallR = pygame.Rect(WIDTH - wall_pixel_offset, 0,
+                                wall_pixel_offset, HEIGHT)
+        rectWallT = pygame.Rect(0, 0, WIDTH, wall_pixel_offset)
+        rectWallB = pygame.Rect(0, HEIGHT - wall_pixel_offset,
+                                WIDTH, wall_pixel_offset)
+        return [rectWallL, rectWallR, rectWallT, rectWallB]
+
 
 class Wall():
     def __init__(self, x, y, width, height, transparency):
@@ -365,239 +664,268 @@ class Wall():
             pygame.draw.rect(screen, (49, 60, 60), self.rect)
 
 
-class Beacon():
-    def __init__(self, x, y, radius, screen, id):
-        self.rect = pygame.draw.circle(screen, (0, 0, 0), (x, y), radius)
-        self.radius = radius
+class Dust:
+    def __init__(self, x, y, img, id):
         self.x = x
         self.y = y
+        self.img = img
+        self.rect = pygame.Rect(x, y, img.get_width(), img.get_height())
         self.id = id
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0, 0, 0), (self.x, self.y), self.radius)
+        screen.blit(self.img, (self.x, self.y))
 
 
-class Envir:
-    def __init__(self, dimension):
-        # colors
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
-        self.gray = (49, 60, 60)
-        self.blue = (20, 80, 155)
-        self.red = (255, 0, 0)
-        # map_dims
-        self.height = dimension[0]
-        self.width = dimension[1]
+class Robot(object):
+
+    def __init__(self, weights, epoch, robot_i):
+        self.results = self.Main(weights, epoch, robot_i)
+
+    def Main(self, NN, epoch, robot_i):
+        pygame.init()
+
+        # images
+        BACKGROUND = pygame.image.load("images/background.png")
+        ROBOT = pygame.image.load("images/vacuum.png")
+        ICON = pygame.image.load('images/icon.png')
+        DUST = pygame.image.load('images/dust.png')
+
+        # main sceen
+        WIDTH, HEIGHT = 800, 600  # dimentions
+        SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
         # window setting
-        self.map = pygame.display.set_mode((self.width, self.height))
-        # trails
-        self.trail_set = []
-        self.dash_trail_set = []
+        pygame.display.set_caption("Mobile Robot Simulator")
+        pygame.display.set_icon(ICON)
+        pygame.rect.Rect
+        MAIN_FONT = pygame.font.SysFont("comicsans", 22)
+        SENSORS_FONT = pygame.font.SysFont("comicsans", 12)
 
-    # line route
-    def trail(self, pos):
-        for i in range(0, len(self.trail_set) - 1):
-            pygame.draw.line(self.map, self.white, (self.trail_set[i][0], self.trail_set[i][1]),
-                             (self.trail_set[i + 1][0], self.trail_set[i + 1][1]))
-        if self.trail_set.__sizeof__() > 10000:
-            self.trail_set.pop(0)
-        self.trail_set.append(pos)
+        # SENSORS - Divide circumference by number of sensors
+        STEP_ANGLE = (math.pi * 2) / 12
+        # -------
 
-    # estimated line route
-    def dotted_line(self, pos):
-        for i in range(0, len(self.dash_trail_set) - 1):
-            pygame.draw.line(self.map, (0,255,255), (self.dash_trail_set[i][0] + 5, self.dash_trail_set[i][1] + 5),
-                             (self.dash_trail_set[i + 1][0] + 1, self.dash_trail_set[i + 1][1] + 1))
-        if self.dash_trail_set.__sizeof__() > 1000000:
-            self.dash_trail_set.pop(0)
-        self.dash_trail_set.append(pos)
+        images = [(BACKGROUND, (0, 0), "bg")]
+        # the robot
+        # player_robot = PlayRobot()
+        # walls
 
-    # y and x axis
-    def robot_frame(self, pos, rotation):
-        n = 80
-        # centerx, centery = pos
-        centerx = pos[0] + (ROBOT.get_width() / 2)
-        centery = pos[1] + (ROBOT.get_height() / 2)
-        x_axis = (centerx + n * np.cos(rotation), centery + n * np.sin(rotation))
-        y_axis = (centerx + n * np.cos(rotation + np.pi / 2),
-                  centery + n * np.sin(rotation + np.pi / 2))
-        pygame.draw.line(self.map, self.black, (centerx, centery), x_axis, 3)
-        pygame.draw.line(self.map, self.black, (centerx, centery), y_axis, 3)
-
-    def draw(self, screen, images, player_robot):
-
-        # display images on screen
-        for img, pos, name in images:
-            screen.blit(img, pos)
-
-        # display left, right velocity and theta on screen
-        vel_text = MAIN_FONT.render(
-            f"v = {round(player_robot.v, 2)} w = {round(player_robot.w, 2)} theta = {int(np.degrees(player_robot.theta))}",
-            1, self.white)
-        screen.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 40))
-        # display robot on screen
-        player_robot.draw(screen)
-        # pygame.display.update()
-
-        # display beacons on the walls
-        wall_list2 = [(30, 170), (400, 170), (170, 330), (570, 330), (170, 580),
-                      (350, 500), (350, 750), (32, 746), (32, 54), (568, 54), (568, 746)]
-        for beacons in wall_list2:
-            pygame.draw.circle(SCREEN, (0, 0, 0), beacons, 7)
-
-    def draw_ellipses(self,width, height, angle,location):
-        width = width
-        height = height
-        angle = angle
-        x, y = location
-        # transparent surface
-        surface = pygame.Surface((100, 100), pygame.SRCALPHA)
-        size = (50 - width , 50 - height , width * 10, height * 10)
-        pygame.draw.ellipse(surface, (253,203,113), size, 2)
-        rotate = pygame.transform.rotate(surface, angle)
-        SCREEN.blit(rotate, (x - rotate.get_rect().center[0], y - rotate.get_rect().center[1]))
-
-    def setWalls():
         wall_pixel_offset = 42
-        rectWallL = pygame.Rect(0, 0, wall_pixel_offset, HEIGHT)
-        rectWallR = pygame.Rect(WIDTH - wall_pixel_offset, 0,
-                                wall_pixel_offset, HEIGHT)
-        rectWallT = pygame.Rect(0, 0, WIDTH, wall_pixel_offset)
-        rectWallB = pygame.Rect(0, HEIGHT - wall_pixel_offset,
-                                WIDTH, wall_pixel_offset)
-        return [rectWallL, rectWallR, rectWallT, rectWallB]
+        
+        #no walls
+        wall_list1 = [ Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+
+        #aisle
+        wall_list2 = [Wall(0, 500, 800, 20, False), Wall(0, 350, 800, 20, False),
+                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+        #corner turn
+        wall_list = [Wall(0, 500, 720, 20, False), Wall(0, 350, 520, 20, False),
+                      Wall(500, 20, 20, 347, False), Wall(
+                          700, 25, 20, 490, False),
+                      Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                      Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                           True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                      Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]              
+        #four walls
+        wall_list4 = [Wall(100, 40, 20, 300, False), Wall(260, 200, 20, 400, False), Wall(500, 40, 20, 400, False), Wall(700, 200, 20, 400, False),
+                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                          True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+
+        #two turns
+        wall_list5 = [Wall(0, 500, 700, 20, False), Wall(0, 350, 500, 20, False),
+                     Wall(500, 150, 20, 220, False), Wall(
+                         700, 150, 20, 370, False),
+                     Wall(0, 150, 500, 20, False), Wall(0, 60, 800, 20, False), Wall(700, 150, 800, 20, False),
+                     Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
+                     Wall(WIDTH - wall_pixel_offset, 0, wall_pixel_offset, HEIGHT,
+                     True), Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
+                     Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
 
-class PlayRobot(RobotMove):
-    IMG = ROBOT
-    START_POS = (50, 50)
-    trail_set = []
-    # running game or not
+        list = []
+        x = 5
+
+        for i in range(30):
+            x += 25
+            y = 3
+            for j in range(30):
+                y += 50
+                list.append((Dust(x, y, DUST, i)))
+        #two turns
+        list1 = [(Dust(600, 340, DUST, 1)), Dust(600, 440, DUST, 2), (Dust(600, 140, DUST, 3)),
+                 (Dust(650, 300, DUST, 1)), Dust(
+                     650, 400, DUST, 2), (Dust(650, 100, DUST, 3)),
+                 (Dust(650, 200, DUST, 3)), (Dust(600, 240, DUST, 3)), (Dust(600, 220, DUST, 3)), (Dust(600, 320, DUST, 3)), (Dust(600, 120, DUST, 3)), (Dust(600, 420, DUST, 3)), (Dust(550, 260, DUST, 3)), (Dust(550, 360, DUST, 3)), (Dust(550, 160, DUST, 3)), (Dust(550, 460, DUST, 3)), (Dust(450, 460, DUST, 3)), (Dust(350, 460, DUST, 3)), (Dust(
+                     250, 460, DUST, 3)), (Dust(150, 460, DUST, 3)), (Dust(550, 390, DUST, 3)), (Dust(450, 390, DUST, 3)), (Dust(350, 390, DUST, 3)), (Dust(250, 390, DUST, 3)), (Dust(150, 390, DUST, 3)), (Dust(100, 90, DUST, 3)), (Dust(550, 90, DUST, 3)), (Dust(450, 90, DUST, 3)), (Dust(350, 90, DUST, 3)), (Dust(250, 90, DUST, 3)),
+                 (Dust(150, 90, DUST, 3)), (Dust(50, 90, DUST, 3)), (Dust(650, 90, DUST, 3)), (Dust(750, 90, DUST, 3))]
+        
+        #corner turn
+        list4 = [(Dust(600, 340, DUST, 1)), Dust(600, 440, DUST, 2), (Dust(600, 140, DUST, 3)),
+                 (Dust(650, 300, DUST, 4)), Dust(650, 400, DUST, 5), (Dust(650, 100, DUST, 6)),
+                 (Dust(650, 200, DUST, 7)), (Dust(600, 240, DUST, 8)), (Dust(600, 220, DUST, 9)), 
+                 (Dust(600, 320, DUST, 10)), (Dust(600, 120, DUST, 11)), (Dust(600, 420, DUST, 12)), 
+                 (Dust(550, 260, DUST, 13)), (Dust(550, 360, DUST, 14)), (Dust(550, 160, DUST, 15)),
+                 (Dust(550, 460, DUST, 16)), (Dust(450, 460, DUST, 17)), (Dust(350, 460, DUST, 18)), 
+                 (Dust(250, 460, DUST, 19)), (Dust(150, 460, DUST, 20)), (Dust(550, 390, DUST, 21)), 
+                 (Dust(450, 390, DUST, 22)), (Dust(350, 390, DUST, 23)), (Dust(250, 390, DUST, 24)), 
+                 (Dust(150, 390, DUST, 25)), (Dust(600, 320, DUST, 26)), Dust(600, 420, DUST, 27), (Dust(600, 120, DUST, 28)),
+                 (Dust(630, 300, DUST, 29)), Dust(630, 400, DUST, 30), (Dust(630, 100, DUST, 31)),(Dust(630, 200, DUST, 32)), 
+                 (Dust(630, 220, DUST, 33)), (Dust(630, 320, DUST, 34)), (Dust(630, 120, DUST, 35)), (Dust(630, 420, DUST, 36)), 
+                 (Dust(530, 260, DUST, 37)), (Dust(530, 360, DUST, 38)), (Dust(530, 160, DUST, 39)), (Dust(530, 460, DUST, 40)), 
+                 (Dust(430, 460, DUST, 41)), (Dust(330, 460, DUST, 42)), (Dust(230, 460, DUST, 43)), (Dust(130, 460, DUST, 44)), 
+                 (Dust(530, 390, DUST, 45)), (Dust(430, 390, DUST, 46)), (Dust(330, 390, DUST, 47)), (Dust(230, 390, DUST, 48)), 
+                 (Dust(130, 390, DUST, 49)),(Dust(550, 430, DUST, 50)), (Dust(450, 430, DUST, 51)), (Dust(350, 430, DUST, 52)), 
+                 (Dust(250, 430, DUST, 53)), (Dust(150, 430, DUST, 54)),(Dust(430, 430, DUST, 55)), (Dust(330, 430, DUST, 56)), 
+                 (Dust(230, 430, DUST, 57)),(Dust(530, 430, DUST, 58))]
+        #aisle        
+        list5 = [(Dust(550, 460, DUST, 1)),(Dust(550, 390, DUST, 2)),(Dust(550, 430, DUST, 3)),
+                 (Dust(525, 460, DUST, 4)), (Dust(525, 390, DUST, 5)),(Dust(525, 430, DUST, 6)),
+                 (Dust(600, 460, DUST, 7)),(Dust(600, 390, DUST, 8)),(Dust(600, 430, DUST, 9)),
+                 (Dust(450, 460, DUST, 10)),(Dust(450, 390, DUST, 11)), (Dust(450, 430, DUST, 12)),
+                 (Dust(350, 460, DUST, 13)),(Dust(350, 390, DUST, 14)),(Dust(350, 430, DUST, 15)),
+                 (Dust(250, 460, DUST, 16)),(Dust(250, 390, DUST, 17)), (Dust(250, 430, DUST, 18)),
+                 (Dust(425, 460, DUST, 19)),(Dust(425, 390, DUST, 20)),(Dust(430, 430, DUST, 21)),
+                 (Dust(150, 460, DUST, 22)),(Dust(150, 390, DUST, 23)),(Dust(150, 430, DUST, 24)),
+                 (Dust(325, 460, DUST, 25)), (Dust(325, 390, DUST, 26)),(Dust(325, 430, DUST, 27)), 
+                 (Dust(225, 460, DUST, 28)), (Dust(225, 390, DUST, 29)),(Dust(225, 430, DUST, 25)),
+                 (Dust(125, 460, DUST, 31)), (Dust(125, 390, DUST, 32)),(Dust(125, 430, DUST, 33)),
+                 (Dust(325, 460, DUST, 34)),(Dust(325, 390, DUST, 35)),(Dust(325, 430, DUST, 36)), 
+                 (Dust(650, 460, DUST, 37)),(Dust(650, 390, DUST, 38)),(Dust(650, 430, DUST, 39)),
+                 (Dust(625, 460, DUST, 37)),(Dust(625, 390, DUST, 38)),(Dust(625, 430, DUST, 39)),
+                 (Dust(700, 460, DUST, 40)),(Dust(700, 390, DUST, 41)),(Dust(700, 430, DUST, 42)),
+                 (Dust(725, 460, DUST, 43)),(Dust(725, 390, DUST, 44)),(Dust(725, 430, DUST, 45))]
+
+        dustImg = list4
+
+        # enviroment prints
+        environment = Envir([600, 800])
+        walls = Envir.setWalls(HEIGHT, WIDTH)
+
+        for wall in wall_list:
+            walls.append(wall.rect)
+
+        player_robot = PlayRobot(ROBOT)
+
+        # dt
+        dt = 50
+        clock = pygame.time.Clock()
+        FPS = 60
+
+        nn = robotNN.network(NN.weights)
+        deltat = 0
+        start_time = time.time()
+
+        # simulation loop
+        while time.time() - start_time < 15: #set time experiment
+            
+            # activate quit button
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    break
+
+            # timer
+            clock.tick(FPS)
+
+            # activate buttons
+            keys = pygame.key.get_pressed()
+            key = [keys[pygame.K_w], keys[pygame.K_s], keys[pygame.K_o], keys[pygame.K_l],
+                   keys[pygame.K_t], keys[pygame.K_g], keys[pygame.K_x]]
+
+            # run the robot
+            activate = player_robot.move(key, dt, wall_list, SCREEN)
+
+            # visualize objects
+
+            dustEncountered(player_robot, dustImg)
+            environment.draw(SCREEN, images, player_robot, MAIN_FONT, HEIGHT)
+            for wall in wall_list:
+                wall.draw(SCREEN)
+            for dust in dustImg:
+                dust.draw(SCREEN)
+            environment.dustCheck(dustImg)
+            environment.robot_frame(
+                (player_robot.x, player_robot.y), player_robot.theta, player_robot.img)
+            environment.trail((player_robot.x + (ROBOT.get_width() / 2),
+                               player_robot.y + (ROBOT.get_height() / 2)))
+            player_robot.upd_rect()
+            player_robot.draw(environment.map)
+
+            string = "Epochs: " + str(epoch+1) + "   Robot ID: " + str(robot_i+1)
+            vel_text = MAIN_FONT.render(string, 4, (255, 255, 255))
+            SCREEN.blit(vel_text, (50, 10))
+
+            score = evaluate_fitness(
+                player_robot, environment.dustCheck(dustImg))
+
+            # THESE SENSORS ARE THE FIRST 12 INPUTS FOR THE NEURAL NETWORK
+
+            sensors = cast_rays(SCREEN, walls, player_robot,
+                                ROBOT, STEP_ANGLE, SENSORS_FONT)
+            
+            output, feedback = nn.runNN(sensors)
 
 
-run = True
-images = [(BACKGROUND, (0, 0), "bg")]
+            deltat = 0
+            #translate the output as keys (didnt work)
+            '''
+            keys = [0, 0, 0, 0, 0, 0, 0]  
+            [mota, motb] = output
+            
+            if mota > 0.5:
+                keys[4] = 1
+            elif mota >= 0:
+                keys[0] = 1
+            elif mota < 0.5:
+                keys[5] = 1
+            elif mota < 0:
+                keys[1] = 1
 
-wall_pixel_offset = 42
+            if motb > 0.5:
+                keys[4] = 1
+            elif motb >= 0:
+                keys[2] = 1
+            elif motb < 0.5:
+                keys[5] = 1
+            elif motb < 0:
+                keys[3] = 1'''
 
-# four walls
-wall_list = [Wall(30, 170, 370, 5, False),
-             Wall(170, 330, 400, 5, False),
-             Wall(170, 330, 5, 250, False),
-             Wall(350, 500, 5, 250, False),
-             Wall(0, 0, wall_pixel_offset - 1, HEIGHT, True),
-             Wall(WIDTH - wall_pixel_offset, 0,
-                  wall_pixel_offset, HEIGHT, True),
-             Wall(0, 0, WIDTH, wall_pixel_offset - 1, True),
-             Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
+            #translate the ooutput as velocities
+            [vl, vr] = output
+            activate2 = player_robot.simulation_move(
+                vl, vr, dt, wall_list, SCREEN)
+            #activate3 = player_robot.move(keys, dt, wall_list, SCREEN)
+            deltat += 1
 
-# the robot
-player_robot = PlayRobot()
+            if player_robot.vl == -player_robot.vr or player_robot.vr == -player_robot.vl:
+                print('Closed because of instability')
+                return score
+            elif player_robot.vl == 0 or player_robot.vl == -0 and player_robot.vr == 0 or player_robot.vr == -0:
+                print("Closed because of 0 velocity")
+                return score
+            if player_robot.wallCollisions > 0:
+                print('Closed because of collision')
+                return score
+            # print("Dust remaining ", dustCheck(dustImg))
+            # print("Wall Collisions", player_robot.wallCollisions)
 
-# enviroment prints
-environment = Envir([800, 600])
-walls = Envir.setWalls()
+            # ---
+            # print(output)
 
-for wall in wall_list:
-    walls.append(wall.rect)
-
-# dt
-dt = 0.1
-clock = pygame.time.Clock()
-FPS = 60
-
-# display beacons on the walls
-# wall_list2 =[(30, 170),(400, 170),(170, 330),(570,330),(170, 580),
-#             (350, 500),(350,750),(32,746),(32,54),(568,54),(568,746)]
-# for beacons in wall_list2:
-#     pygame.draw.circle(SCREEN,(0, 0, 0),beacons,7)
-
-beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon(170, 330, 7, SCREEN, 2),
-           Beacon(570, 330, 7, SCREEN, 3), Beacon(170, 580, 7, SCREEN, 4),
-           Beacon(350, 500, 7, SCREEN, 5), Beacon(350, 750, 7, SCREEN, 6), Beacon(32, 746, 7, SCREEN, 7),
-           Beacon(32, 54, 7, SCREEN, 8), Beacon(568, 54, 7, SCREEN, 9), Beacon(568, 746, 7, SCREEN, 10)]
-
-error_mov = [0, 0.1]
-error_rot = [0, 0.1]
-sensor_mov = [0, 0.1]
-sensor_rot = [0, 0.1]
-
-
-player_robot = PlayRobot(error_mov, error_rot)
-player_robot_motion_prediction = PlayRobot()
-
-filter = KalmanFilter(dt, (player_robot.x, player_robot.y, player_robot.theta), error_mov[1], error_rot[1], sensor_mov[1], sensor_rot[1])
-
-# simulation loop
-while run:
-
-    # activate quit button
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-        # timer
-    clock.tick(FPS)
-
-    # activate buttons
-    keys = pygame.key.get_pressed()
-    key = [keys[pygame.K_w], keys[pygame.K_s], keys[pygame.K_a],
-           keys[pygame.K_d], keys[pygame.K_x]]
-
-    # run the robot
-    activate = player_robot.move(key, dt)
-    activate_2 = player_robot_motion_prediction.move(key, dt)
-    if activate_2 :
-        filter.m = activate_2
-    # visualize objects
-    environment.draw(SCREEN, images, player_robot)
-    for bc in beacons:
-        bc.draw(SCREEN)
-    for wall in wall_list:
-        wall.draw(SCREEN)
-        environment.robot_frame(
-            (player_robot.x, player_robot.y), player_robot.theta)
-
-    # actual robot trajectory
-    environment.trail((player_robot.x + (ROBOT.get_width() / 2),
-                       player_robot.y + (ROBOT.get_height() / 2)))
-
-    # estimated robot trajectory
-
-
-    player_robot.upd_rect()
-    player_robot.draw(environment.map)
-
-    # if (round(time.time() % 1, 1) == 0.10):
-    # cast_rays(SCREEN, beacons)
-    # filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta),player_robot.v,player_robot.w)
-    predicted_position = find_beacon(SCREEN, beacons)
-
-    if predicted_position:
-        pygame.draw.circle(SCREEN, (100, 10, 50),
-                           (predicted_position[0], predicted_position[1]), 5)
-
-    localization = filter.localization(predicted_position, player_robot_motion_prediction.v, player_robot_motion_prediction.w,
-                                       [player_robot_motion_prediction.x, player_robot_motion_prediction.y, player_robot_motion_prediction.theta])
-    # ---
-    #add sensor error
-    if localization != 0 :
-        filter.predictiontrack[-1][0] += np.random.normal(sensor_mov[0], sensor_mov[1])
-        filter.predictiontrack[-1][1] += np.random.normal(sensor_mov[0], sensor_mov[1])
-        filter.predictiontrack[-1][2] += np.random.normal(sensor_rot[0], sensor_rot[1])
-
-
-    player_robot_motion_prediction.x = filter.predictiontrack[-1][0]
-    player_robot_motion_prediction.y = filter.predictiontrack[-1][1]
-    player_robot_motion_prediction.theta = filter.predictiontrack[-1][2]
-
-    environment.dotted_line((player_robot_motion_prediction.x,
-                             player_robot_motion_prediction.y))
-    # show intermediate estimates of potition of covariance
-    for i in range(len(filter.history)):
-            environment.draw_ellipses(filter.history[i][0],filter.history[i][1],filter.history[i][2],filter.location[i])
-
-    pygame.display.update()
-
-# exit the game
-pygame.quit()
+            # screen timer 
+            timer_text = MAIN_FONT.render(
+                f"Timer = {round(time.time() - start_time, 2)}",
+                1, (255, 255, 255))
+            SCREEN.blit(timer_text, (10, HEIGHT -
+                        timer_text.get_height() - 10))
+            pygame.display.update()
+            # print(score)
+        return score
+        # exit the game
+        pygame.quit()
