@@ -4,8 +4,6 @@ import math
 import robotNN
 import time
 
-# os.chdir("C://Users/nickd/PycharmProjects/Mobile-Robot-Simulator")
-# os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 
 def blit_rotate_center(win, image, top_left, angle):
