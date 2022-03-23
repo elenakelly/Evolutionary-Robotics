@@ -1,17 +1,26 @@
-# Evolutionary-Robotics
+# Evolutional Argorithm
 
-In order to for all of us to understand how the algorithm works, each of us tried to make their own version of it. After, seeing each other's code, we deside to choose the one with the best results. </br>
+Here you can see a Evolutional Algorithm that is tested on benchmark functions
 
-(note: robot,functions and plots were imported from previous assigments) </br>
+## Benchmark functions
+* Rosenbrock
+* Rastrigin
 
-* Main task: "EA on benchmark functions"*
+## Installation
+The program is in Python <br />
+In order to use the code you need to install Numpy and Random for the calculations and Imageio and Matplotlib for the visualization
+   ```sh
+    import numpy as np
+    from matplotlib import pyplot as plt
+    import imageio
+    import random
+   ```
+
+## Contributors
+Elena Kane </br>
+Nikolaos Ntantis </br>
+Ioannis Montesantos 
 
 
-CODE DIVISION :</br>
-
-
-Elena Kane i6289291 -  run experiments on rosenbrock</br>
-Nikolaos Ntantis i6273751 -  created the main sturcture of EA</br>
-Ioannis Montesantos i6292068 -  run experiments on rastrigin</br>
 
 
