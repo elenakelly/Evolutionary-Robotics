@@ -1,10 +1,15 @@
 # Evolutionary Robotics
 
- You can start by running the file:
- ### `Main`
+Simulator programmed in Python with PyGame.
+You can start by running the file:
+### `Main`
+Where you can difine the iterations, the population size, the selected percentage, the error range and the mutation percentage.</br>
  
-The Main purpose of the code is to Create a neural networks & evolutional algorithm for a robot simulator robot. </br>
+ 
+The Main purpose of the code is to Create a neural network in combination of an evolutional algorithm for a robot simulator robot. </br>
+The evolutionary alogirthm implemented, trains the robots in several rooms at each generation and uses the average fitness as robot fitness to select. It can use one or two points crossover, mutation and elitism. </br>
 
+## Contents
 * Mobile robot simulator</br>
 * ANN as controller </br>
 * EA for evolve weights of ANN </br>
