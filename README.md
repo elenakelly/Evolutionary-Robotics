@@ -3,7 +3,7 @@
 Simulator programmed in Python with PyGame.
 You can start by running the file:
 ### `Main`
-Where you can difine the iterations, the population size, the selected percentage, the error range and the mutation percentage.</br>
+Where you can define the iterations, the population size, the selected percentage, the error range and the mutation percentage.</br>
  
  
 The Main purpose of the code is to Create a neural network in combination of an evolutional algorithm for a robot simulator robot. </br>
