@@ -1,5 +1,8 @@
 # Evolutionary Robotics
 
+ You can start by running the file:
+ ### `Main`
+ 
 The Main purpose of the code is to Create a neural networks & evolutional algorithm for a robot simulator robot. </br>
 
 * Mobile robot simulator</br>
