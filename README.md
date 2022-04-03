@@ -1,6 +1,8 @@
 # Evolutional Argorithm
 
 Here you can see a Evolutional Algorithm that is tested on benchmark functions
+You can start by running the file:
+### `Main`
 
 ## Benchmark functions
 * Rosenbrock
